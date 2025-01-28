@@ -1,7 +1,7 @@
 {
-  "name": "koffinate/laravel",
+  "name": "koffinate/laravel-pack",
   "type": "library",
-  "description": "Koffinate for laravel",
+  "description": "Laravel plugin pack by Koffinate",
   "keywords": ["php", "laravel", "framework", "koffinate", "yusron", "yusronarif"],
   "license": "MIT",
   "authors": [
