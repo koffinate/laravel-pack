@@ -1,0 +1,38 @@
+{
+  "name": "koffinate/laravel-base",
+  "type": "library",
+  "description": "Koffinate base service for laravel",
+  "keywords": ["laravel", "framework", "koffinate", "yusron", "yusronarif"],
+  "license": "MIT",
+  "require": {
+    "php": "^8.2",
+    "illuminate/contracts": "^10.0|^11.0",
+    "illuminate/support": "^10.0|^11.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Kfn\\Base\\": ""
+    },
+    "files": [
+      "helpers.php"
+    ]
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-main": "1.x-dev"
+    },
+    "laravel": {
+      "providers": [
+        "Kfn\\Base\\BaseServiceProvider"
+      ],
+      "aliases": {}
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}

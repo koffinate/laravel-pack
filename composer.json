@@ -1,0 +1,52 @@
+{
+  "name": "koffinate/laravel",
+  "type": "library",
+  "description": "Koffinate for laravel",
+  "keywords": ["php", "laravel", "framework", "koffinate", "yusron", "yusronarif"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Much Yusron Arif",
+      "email": "yusron.arif4@gmail.com",
+      "homepage": "https://yusronarif.github.io",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^8.2",
+    "ext-json": "*",
+    "illuminate/auth": "^11.0",
+    "illuminate/container": "^11.0",
+    "illuminate/contracts": "^11.0",
+    "illuminate/database": "^11.0",
+    "illuminate/support": "^11.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Kfn\\": "src/"
+    },
+    "files": [
+      "src/Base/helpers.php",
+      "src/UI/helpers.php",
+      "src/Util/helpers.php"
+    ]
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-main": "1.x-dev"
+    },
+    "laravel": {
+      "providers": [
+        "Kfn\\Util\\UtilServiceProvider",
+        "Kfn\\Base\\BaseServiceProvider",
+        "Kfn\\UI\\UiServiceProvider"
+      ],
+      "aliases": {}
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
