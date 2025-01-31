@@ -28,8 +28,8 @@ class UiServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->publishes([__DIR__.'/config/ui.php' => config_path('koffinate/ui.php')], 'config');
-        $this->publishes([__DIR__.'/config/plugins.php' => config_path('koffinate/plugins.php')], 'config');
+        $this->publishes([__DIR__.'/config/ui.php' => config_path('koffinate/ui.php')], 'koffinate_config');
+        $this->publishes([__DIR__.'/config/plugins.php' => config_path('koffinate/plugins.php')], 'koffinate_config');
 
         $this->blades();
     }
@@ -44,7 +44,10 @@ class UiServiceProvider extends ServiceProvider
         });
 
         Blade::directive('plugins', function ($arguments) {
-            return "<?php plugins( {$arguments} ); ?>";
+            if (! str($arguments)->contains(['[', ':'])) {
+                $arguments = "[{$arguments}]";
+            }
+            return "<?php plugins({$arguments}); ?>";
         });
     }
 }

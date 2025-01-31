@@ -11,7 +11,7 @@ class BaseServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->publishes([__DIR__.'/config.php' => config_path('koffinate/base.php')], 'config');
+        $this->publishes([__DIR__.'/config.php' => config_path('koffinate/base.php')], 'koffinate_config');
     }
 
     /** @inheritDoc */

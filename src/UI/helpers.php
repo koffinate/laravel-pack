@@ -150,43 +150,111 @@ if (!function_exists('plugins')) {
             return;
         }
 
+        $assetType = config('koffinate.plugins.asset_type');
         $name = (array)$name;
         $type = (array)$type;
 
         $rs = [];
-
-        foreach ($name as $pkgKey => $pkgVal) {
-            if (is_array($pkgVal)) {
+        if ($assetType == 'vite') {
+            foreach ($name as $pkgKey => $pkgVal) {
                 $rs = array_merge_recursive(
                     $rs,
-                    pluginAssets(names: $pkgKey, base: $base, type: $type)
+                    viteAssets(names: $pkgVal, type: $type)
                 );
-
-                foreach ($pkgVal as $pKey => $pVal) {
+            }
+        } else {
+            foreach ($name as $pkgKey => $pkgVal) {
+                if (is_array($pkgVal)) {
                     $rs = array_merge_recursive(
                         $rs,
-                        pluginAssets(names: $pVal, base: $base, type: $type, parent: $pkgKey . '.' . $pKey . '.')
+                        pluginAssets(names: $pkgKey, base: $base, type: $type)
+                    );
+
+                    foreach ($pkgVal as $pKey => $pVal) {
+                        $rs = array_merge_recursive(
+                            $rs,
+                            pluginAssets(names: $pVal, base: $base, type: $type, parent: $pkgKey.'.'.$pKey.'.')
+                        );
+                    }
+                } else {
+                    $rs = array_merge_recursive(
+                        $rs,
+                        pluginAssets(names: $pkgVal, base: $base, type: $type)
                     );
                 }
-            } else {
-                $rs = array_merge_recursive(
-                    $rs,
-                    pluginAssets(names: $pkgVal, base: $base, type: $type)
-                );
             }
         }
         $rs = fluent($rs);
 
-        $css = $rs->get('css');
-        if (is_array($css)) {
-            $css = implode('', $css);
-        }
-        $js = $rs->get('js');
-        if (is_array($js)) {
-            $js = implode('', $js);
+        if ($assetType == 'vite') {
+            $css = $rs->get('css');
+            $css = !empty($css)
+                ? app(Illuminate\Foundation\Vite::class)($css)->toHtml()
+                : '';
+            $httpCss = $rs->get('http_css');
+            if (!empty($httpCss)) {
+                $css .= implode('', (array) $httpCss);
+            }
+
+            $js = $rs->get('js');
+            $js = !empty($js)
+                ? app(Illuminate\Foundation\Vite::class)($js)->toHtml()
+                : '';
+            $httpJs = $rs->get('http_js');
+            if (!empty($httpJs)) {
+                $js .= implode('', (array) $httpJs);
+            }
+
+        } else {
+            $css = $rs->get('css', '');
+            if (is_array($css)) {
+                $css = implode('', $css);
+            }
+            $js = $rs->get('js', '');
+            if (is_array($js)) {
+                $js = implode('', $js);
+            }
         }
 
         View::share(['pluginCss' => $css ?? '', 'pluginJs' => $js ?? '']);
+    }
+}
+
+if (!function_exists('viteAssets')) {
+    /**
+     * Retrieve Application Plugin's Assets.
+     * retrieving from config's definitions.
+     *
+     * @param  array|string  $names
+     * @param  array  $type
+     *
+     * @return array
+     */
+    function viteAssets(
+        array|string $names,
+        array $type = ['css', 'js'],
+    ): array {
+        $package = "koffinate.plugins.items.";
+        $httpPattern = '/^(http[s?]:)/i';
+        $rs = ['css' => [], 'js' => [], 'http_css' => '', 'http_js' => ''];
+        foreach ((array) $names as $name) {
+            foreach ($type as $t) {
+                if (config()->has("{$package}{$name}.{$t}")) {
+                    foreach ((array) config("{$package}{$name}.{$t}") as $file) {
+                        if (preg_match($httpPattern, $file)) {
+                            $rs['http_'.$t] .= match ($t) {
+                                'css' => "<link href='{$file}' rel='stylesheet'>",
+                                'js' => "<script type='module' src='{$file}'></script>",
+                            };
+                        } else {
+                            $rs[$t][] = $file;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $rs;
     }
 }
 
@@ -207,8 +275,7 @@ if (!function_exists('pluginAssets')) {
         string $base = 'local',
         array  $type = ['css', 'js'],
         string $parent = '',
-    ): array
-    {
+    ): array {
         if (! is_array($names)) {
             $names = (array) $names;
         }
@@ -238,7 +305,7 @@ if (!function_exists('pluginAssets')) {
                         } else {
                             $src = match ($base) {
                                 'vendor' => vendor($file),
-                                'local' => cachedAsset($localPath . $file),
+                                'local' => cachedAsset($localPath.$file),
                                 default => null,
                             };
                         }
@@ -582,5 +649,26 @@ if (!function_exists('cachedAsset')) {
             : asset($path, $secure);
 
         return $asset . '?_v=' . config('cache.version', time());
+    }
+}
+
+if (! function_exists('includeIf')) {
+    /**
+     * @param  string|null  $path
+     *
+     * @return void
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
+    function includeIf(string|null $path = null): void
+    {
+        if (!$path) return;
+
+        $view = app('view');
+        if ($view->exists($path)) {
+            echo $view->make(
+                $path,
+                \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path'])
+            )->render();
+        }
     }
 }

@@ -12,6 +12,13 @@ return [
     'base_path' => 'assets/plugins',
 
     /*
+     * Asset type
+     * e.g. null, vite, etc.
+     * or leave blank
+     */
+    'asset_type' => null,
+
+    /*
      * Script tag type attribute
      * fill with native script type attribute
      * e.g. text/javascript, module, etc.
