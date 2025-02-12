@@ -672,3 +672,30 @@ if (! function_exists('includeIf')) {
         }
     }
 }
+
+if (! function_exists('methodIf')) {
+    /**
+     * @param  bool  $condition
+     * @param  string  $method
+     *
+     * @return \Illuminate\Support\HtmlString
+     */
+    function methodIf(bool $condition, string $method): \Illuminate\Support\HtmlString
+    {
+        return $condition
+            ? method_field($method)
+            : new \Illuminate\Support\HtmlString('');
+    }
+}
+
+if (!function_exists('hasStack')) {
+    /**
+     * @param  string|null  $name
+     *
+     * @return bool
+     */
+    function hasStack(string|null $name = null): bool
+    {
+        return $name && !empty(view()->yieldPushContent($name));
+    }
+}

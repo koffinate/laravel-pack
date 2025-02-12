@@ -43,11 +43,30 @@ class UiServiceProvider extends ServiceProvider
             });
         });
 
+        Blade::if('hasStack', function($stackName) {
+            return hasStack($stackName);
+        });
+
         Blade::directive('plugins', function ($arguments) {
             if (! str($arguments)->contains(['[', ':'])) {
                 $arguments = "[{$arguments}]";
             }
             return "<?php plugins({$arguments}); ?>";
+        });
+
+        Blade::directive('method_if', function ($arguments) {
+            $arguments = explode(',', $arguments, 3);
+            $condition = $arguments[0] ?? false;
+            $method = $arguments[1] ?? 'GET';
+            return "<?= methodIf({$condition}, {$method}); ?>";
+        });
+
+        Blade::directive('feedback', function ($args) {
+            return "<?php echo feedbackInput({$args});?>";
+        });
+
+        Blade::directive('feedbackClass', function ($args) {
+            return "<?php echo feedbackClass({$args});?>";
         });
     }
 }
