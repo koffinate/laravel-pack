@@ -50,17 +50,14 @@ if (!function_exists('setDefaultRequest')) {
         try {
             $request = app('request');
 
-            if (is_array($name)) {
-                $data = $name;
-            } else {
-                $data = [$name => $value];
+            $data = $request->old();
+            if (! $data) {
+                $data = is_array($name)
+                    ? $name
+                    : [$name => $value];
             }
 
-            if ($force) {
-                $request->merge($data);
-            } else {
-                $request->mergeIfMissing($data);
-            }
+            $force ? $request->merge($data) : $request->mergeIfMissing($data);
             $request->session()->flashInput($data);
         } catch (Exception $e) {
             throw_if(app()->hasDebugModeEnabled(), $e);
