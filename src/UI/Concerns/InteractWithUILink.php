@@ -15,7 +15,9 @@ trait InteractWithUILink
         // if (method_exists($this, 'setData')) {
         //     $this->setData($name, $value);
         // }
-        view()->share($name, $value);
+        if (! view()->shared($name)) {
+            view()->share($name, $value);
+        }
     }
 
     /**
