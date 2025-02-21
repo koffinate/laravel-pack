@@ -45,22 +45,18 @@ if (!function_exists('setDefaultRequest')) {
      * @return void
      * @throws Throwable
      */
-    function setDefaultRequest(string|array $name, mixed $value = null, bool $force = false): void
+    function setDefaultRequest(string|array $name, mixed $value = null, bool $force = true): void
     {
-        try {
-            $request = app('request');
+        $request = app('request');
+        if (empty(session()->get('_flash.old', []))) {
+            try {
+                $data = is_array($name) ? $name : array_merge(session()->getOldInput(), [$name => $value]);
 
-            $data = $request->old();
-            if (! $data) {
-                $data = is_array($name)
-                    ? $name
-                    : [$name => $value];
+                session()->flashInput($data);
+                $force ? $request->merge($data) : $request->mergeIfMissing($data);
+            } catch (Exception $e) {
+                throw_if(app()->hasDebugModeEnabled(), $e);
             }
-
-            $force ? $request->merge($data) : $request->mergeIfMissing($data);
-            $request->session()->flashInput($data);
-        } catch (Exception $e) {
-            throw_if(app()->hasDebugModeEnabled(), $e);
         }
     }
 }
