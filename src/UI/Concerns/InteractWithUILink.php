@@ -28,6 +28,7 @@ trait InteractWithUILink
     private function loadControllerButtons(): void
     {
         $this->setBackLink('#');
+        $this->setCreateLink('#');
         $this->setDeleteLink('#');
         $this->setDetailLink('#');
         $this->setEditLink('#');
@@ -44,6 +45,19 @@ trait InteractWithUILink
     protected function setBackLink(string $link): static
     {
         $this->setControllerButton('backLink', $link);
+        return $this;
+    }
+
+    /**
+     * Set Create Link.
+     *
+     * @param  string  $link
+     *
+     * @return static
+     */
+    protected function setCreateLink(string $link): static
+    {
+        $this->setControllerButton('createLink', $link);
         return $this;
     }
 
