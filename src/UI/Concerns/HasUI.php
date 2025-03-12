@@ -244,7 +244,7 @@ trait HasUI
     {
         foreach ((array) $breadcrumb as $val) {
             if (is_string($val)) {
-                $this->breadCrumbs->add($this->breadCrumbFormat($breadcrumb));
+                $this->breadCrumbs->add($this->breadCrumbFormat(['title' => $breadcrumb]));
                 break;
             }
             $this->breadCrumbs->add($this->breadCrumbFormat($val));
