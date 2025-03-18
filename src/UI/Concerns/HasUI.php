@@ -120,6 +120,9 @@ trait HasUI
         $this->controllerData['activeUser'] = auth()->user();
         $this->controllerData['pageMeta'] = $this->pageMeta;
         $this->controllerData['breadCrumbs'] = $this->breadCrumbs ?? collect();
+        if (!array_key_exists('isEditMode', $this->controllerData)) {
+            $this->controllerData['isEditMode'] = false;
+        }
 
         $viewPath = $this->viewPath ?: $this->viewPrefix;
         $viewDomain = $this->viewDomain ? "{$this->viewDomain}::" : '';
