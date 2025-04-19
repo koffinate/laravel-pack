@@ -92,6 +92,8 @@ if (!function_exists('carbon')) {
             }
         }
 
+        $timezone ??= config('app.timezone');
+
         try {
             Carbon::setLocale($locale);
         } catch (Exception $e) {
