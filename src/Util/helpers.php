@@ -1,13 +1,14 @@
 <?php
 
 use Illuminate\Contracts\Database;
-use Illuminate\Support\{Carbon,Fluent,Str};
+use Illuminate\Support\{Carbon, Fluent, Str};
 
 if (!function_exists('f')) {
     /**
      * Formatting text as HTML support
      *
-     * @param string $text
+     * @param  string  $text
+     *
      * @return string
      */
     function f(string $text = ''): string
@@ -20,8 +21,8 @@ if (!function_exists('prettySize')) {
     /**
      * Human-readable file size.
      *
-     * @param int $bytes
-     * @param int $decimals
+     * @param  int  $bytes
+     * @param  int  $decimals
      *
      * @return string
      */
@@ -30,15 +31,15 @@ if (!function_exists('prettySize')) {
         $sz = 'BKMGTPE';
         $factor = (int)floor((strlen($bytes) - 1) / 3);
 
-        return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . $sz[$factor];
+        return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)).$sz[$factor];
     }
 }
 
 if (!function_exists('trimAll')) {
     /**
-     * @param null|string $string
-     * @param string $type
-     * @param string $pattern
+     * @param  null|string  $string
+     * @param  string  $type
+     * @param  string  $pattern
      *
      * @return string
      *
@@ -55,12 +56,15 @@ if (!function_exists('trimAll')) {
 
         try {
             return match ($type) {
-                'both' => preg_replace('/^' . $pattern . '|' . $pattern . '$/i', '', $string),
-                'left' => preg_replace('/^' . $pattern . '/i', '', $string),
-                'right' => preg_replace('/' . $pattern . '$/i', '', $string),
-                'all' => preg_replace('/' . $pattern . '/i', '', $string),
-                default => preg_replace('/' . $pattern . '/i', ' ',
-                    preg_replace('/^' . $pattern . '|' . $pattern . '$/i', '', $string)),
+                'both' => preg_replace('/^'.$pattern.'|'.$pattern.'$/i', '', $string),
+                'left' => preg_replace('/^'.$pattern.'/i', '', $string),
+                'right' => preg_replace('/'.$pattern.'$/i', '', $string),
+                'all' => preg_replace('/'.$pattern.'/i', '', $string),
+                default => preg_replace(
+                    '/'.$pattern.'/i',
+                    ' ',
+                    preg_replace('/^'.$pattern.'|'.$pattern.'$/i', '', $string),
+                ),
             };
         } catch (Exception $e) {
         }
@@ -71,28 +75,28 @@ if (!function_exists('trimAll')) {
 
 if (!function_exists('carbon')) {
     /**
-     * @param string|DateTimeInterface|null $datetime
-     * @param DateTimeZone|string|null $timezone
-     * @param string $locale
+     * @param  string|DateTimeInterface|null  $datetime
+     * @param  DateTimeZone|string|null  $timezone
+     * @param  string|null  $locale
      *
      * @return Carbon
      */
     function carbon(
         string|DateTimeInterface|null $datetime = null,
-        string|DateTimeZone|null      $timezone = null,
-        string                        $locale = 'id_ID',
-    ): Carbon
-    {
+        string|DateTimeZone|null $timezone = null,
+        string|null $locale = null,
+    ): Carbon {
         if (auth()->check()) {
-            if (!$timezone && (auth()->user()?->timezone ?? null)) {
-                $timezone = auth()->user()->timezone;
+            if (!$timezone) {
+                $timezone = auth()->user()?->timezone ?? null;
             }
-            if (!$locale && (auth()->user()?->locale ?? null)) {
-                $locale = auth()->user()->locale;
+            if (!$locale) {
+                $locale = auth()->user()?->locale ?? null;
             }
         }
 
-        $timezone ??= config('app.timezone');
+        $timezone ??= config('app.client_timezone');
+        $locale ??= config('app.client_locale') ?: config('app.locale') ?: config('app.fallback_locale');
 
         try {
             Carbon::setLocale($locale);
@@ -100,51 +104,55 @@ if (!function_exists('carbon')) {
             //
         }
 
-        if (!$datetime) {
-            return Carbon::now()->timezone($timezone);
-        }
+        $carbon = $datetime
+            ? Carbon::parse($datetime, config('app.timezone'))
+            : Carbon::now(config('app.timezone'));
 
-        return Carbon::parse($datetime)->timezone($timezone);
+        return empty($timezone) ? $carbon : $carbon->timezone($timezone);
     }
 }
 
 if (!function_exists('carbonFormat')) {
     /**
-     * @param string|DateTimeInterface|null $datetime
-     * @param string $isoFormat
-     * @param string|null $format
-     * @param string|DateTimeZone|null $timezone
-     * @param bool $showTz
+     * @param  string|DateTimeInterface|null  $datetime
+     * @param  string  $isoFormat
+     * @param  string|null  $format
+     * @param  string|DateTimeZone|null  $timezone
+     * @param  bool  $showTz
      *
      * @return string
      */
     function carbonFormat(
         string|DateTimeInterface|null $datetime,
-        string                        $isoFormat = 'L LT',
-        string|null                   $format = null,
-        string|DateTimeZone|null      $timezone = null,
-        bool                          $showTz = true,
-    ): string
-    {
-        $timezone ??= '+07:00';
-        $timezoneSuffix = match (str($timezone)->slug()->toString()) {
-            '7',    // +7
-            '70',   // +7:0
-            '700',  // +7:00
-            '0700',
-            'asiajakarta' => 'WIB',
-            '8',    // +8
-            '80',   // +8:0
-            '800',  // +8:00
-            '0800',
-            'asiamakassar' => 'WITA',
-            '9',    // +9
-            '90',   // +9:0
-            '900',  // +9:00
-            '0900',
-            'asiajayapura' => 'WIT',
-            default => $timezone,
-        };
+        string $isoFormat = 'L LT',
+        string|null $format = null,
+        string|DateTimeZone|null $timezone = null,
+        bool|null $showTz = null,
+    ): string {
+        $timezone ??= config('app.client_timezone') ?: config('app.timezone');
+        $showTz ??= config('app.client_show_timezone', config('app.show_timezone')) || null;
+        $timezoneLabel = '';
+        if ($showTz) {
+            $timezoneSuffix = match (str($timezone)->slug()->toString()) {
+                '7',    // +7
+                '70',   // +7:0
+                '700',  // +7:00
+                '0700',
+                'asiajakarta' => 'WIB',
+                '8',    // +8
+                '80',   // +8:0
+                '800',  // +8:00
+                '0800',
+                'asiamakassar' => 'WITA',
+                '9',    // +9
+                '90',   // +9:0
+                '900',  // +9:00
+                '0900',
+                'asiajayapura' => 'WIT',
+                default => $timezone,
+            };
+            $timezoneLabel = ' '.$timezoneSuffix;
+        }
 
         if (is_null($datetime)) {
             return '';
@@ -152,22 +160,18 @@ if (!function_exists('carbonFormat')) {
 
         if (is_string($datetime)) {
             try {
-                $datetime = Carbon::parse($datetime);
+                $datetime = Carbon::parse($datetime, config('app.timezone'));
             } catch (Exception $e) {
                 return '';
             }
         }
 
         $datetime->timezone($timezone);
-        $timezoneLabel = $showTz && $timezoneSuffix
-            ? " {$timezoneSuffix}"
-            : '';
 
-        if ($format) {
-            return "{$datetime->format($format)}{$timezoneLabel}";
-        }
-
-        return "{$datetime->isoFormat($isoFormat)}{$timezoneLabel}";
+        return ($format
+            ? $datetime->format($format)
+            : $datetime->isoFormat($isoFormat)
+        ).$timezoneLabel;
     }
 }
 
@@ -180,7 +184,7 @@ if (!function_exists('numberFormat')) {
      */
     function numberFormat(float|int|null $number = null, int $decimal = 0): string
     {
-        if (! $number) {
+        if (!$number) {
             return '0';
         }
         return number_format($number, $decimal, ',', '.');
@@ -189,7 +193,7 @@ if (!function_exists('numberFormat')) {
 
 if (!function_exists('toSentry')) {
     /**
-     * @param Throwable $throw
+     * @param  Throwable  $throw
      *
      * @return void
      */
@@ -203,12 +207,12 @@ if (!function_exists('toSentry')) {
 
 if (!function_exists('fluent')) {
     /**
-     * @param array|object|null $data
+     * @param  array|object|null  $data
      *
      * @return Fluent
      * @throws Throwable
      */
-    function fluent(array|object|null & $data = null): Fluent
+    function fluent(array|object|null &$data = null): Fluent
     {
         return toFluent($data);
     }
@@ -216,18 +220,18 @@ if (!function_exists('fluent')) {
 
 if (!function_exists('toFluent')) {
     /**
-     * @param array|object|null $data
+     * @param  array|object|null  $data
      *
      * @return Fluent
      * @throws Throwable
      */
-    function toFluent(array|object|null & $data = null): Fluent
+    function toFluent(array|object|null &$data = null): Fluent
     {
         if (!$data instanceof Fluent) {
             try {
                 $data = new Fluent($data ?? []);
             } catch (Exception $e) {
-                if(app()->hasDebugModeEnabled()) {
+                if (app()->hasDebugModeEnabled()) {
                     throw $e;
                 }
                 $data = new Fluent();
@@ -240,7 +244,7 @@ if (!function_exists('toFluent')) {
 
 if (!function_exists('throwOnDebug')) {
     /**
-     * @param Throwable $throw
+     * @param  Throwable  $throw
      *
      * @return void
      * @throws Throwable
@@ -257,7 +261,7 @@ if (!function_exists('hasRoute')) {
     /**
      * Existing Route by Name.
      *
-     * @param string $name
+     * @param  string  $name
      *
      * @return bool
      */
@@ -272,9 +276,9 @@ if (!function_exists('routed')) {
      * Existing Route by Name
      * with '#' fallback.
      *
-     * @param string $name
-     * @param string|array $params
-     * @param bool $absolute
+     * @param  string  $name
+     * @param  string|array  $params
+     * @param  bool  $absolute
      *
      * @return string
      */
@@ -288,10 +292,32 @@ if (!function_exists('routed')) {
     }
 }
 
+if (!function_exists('to_routed')) {
+    /**
+     * Existing Route by Name
+     * with '#' fallback.
+     *
+     * @param  string  $name
+     * @param  string|array  $params
+     * @param  int  $status
+     * @param  array  $headers
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    function to_routed(string $name, string|array $params = [], int $status = 302, array $headers = []): \Illuminate\Http\RedirectResponse
+    {
+        try {
+            return redirect()->route($name, $params, $status, $headers);
+        } catch (Exception $e) {
+            return back($status, $headers);
+        }
+    }
+}
+
 if (!function_exists('activeRoute')) {
     /**
-     * @param string $route
-     * @param string|array $params
+     * @param  string  $route
+     * @param  string|array  $params
      *
      * @return bool
      */
@@ -326,7 +352,9 @@ if (!function_exists('activeRoute')) {
                     if (is_object($requestRoute->parameter($key))) {
                         // try to check param is enum type
                         try {
-                            if ($requestRoute->parameter($key)->value && $requestRoute->parameter($key)->value != $value) {
+                            if ($requestRoute->parameter($key)->value && $requestRoute->parameter(
+                                    $key,
+                                )->value != $value) {
                                 return false;
                             }
                         } catch (Exception $e) {
@@ -350,14 +378,13 @@ if (!function_exists('activeRoute')) {
 
 if (!function_exists('getRawSql')) {
     /**
-     * @param Database\Eloquent\Builder|Database\Query\Builder $query
+     * @param  Database\Eloquent\Builder|Database\Query\Builder  $query
      *
      * @return string
      */
     function getRawSql(
         Database\Eloquent\Builder|Database\Query\Builder $query,
-    ): string
-    {
+    ): string {
         return Str::replaceArray('?', $query->getBindings(), $query->toSql());
     }
 }
