@@ -123,9 +123,10 @@ class KfnException extends \Exception implements Arrayable, Responsable
      */
     public static function renderException(Request $request, Throwable $e): Response|JsonResponse|SymfonyResponse
     {
-        // dd($e, $request);
+        $apiPrefixes = collect((array) config('koffinate.base.api_prefixes', []));
+        $apiPrefixes->each(fn ($it) => $apiPrefixes->add($it . '/*'));
 
-        if ((! $e instanceof static) && $request->is('api', 'api/*')) {
+        if ((! $e instanceof static) && $request->is($apiPrefixes->toArray())) {
             $e = static::mapToException($request, $e);
         }
 

@@ -22,12 +22,9 @@ class Request extends \Illuminate\Http\Request
     private function isReturnJson(): true|null
     {
         $forceToJson = config('koffinate.base.force_json', false);
-        if (
-            is_bool($forceToJson) && $forceToJson &&
-            in_array($this->segment(1), (array) config('koffinate.base.force_json_prefixes', []))
-        ) {
-            return true;
-        }
-        return null;
+        $forceToJsonPrefixes = collect((array) config('koffinate.base.force_json_prefixes', []));
+        $forceToJsonPrefixes->each(fn ($it) => $forceToJsonPrefixes->add($it . '/*'));
+
+        return is_bool($forceToJson) && $forceToJson && $this->is($forceToJsonPrefixes->toArray()) || null;
     }
 }
