@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
 use Kfn\Base\Contracts\ResponseCodeInterface;
 use Kfn\Base\Enums\ResponseCode;
@@ -143,6 +144,17 @@ class KfnException extends \Exception implements Arrayable, Responsable
      */
     public static function mapToException(Request $request, Throwable $e): static|Throwable
     {
+        try {
+            $statusCode = $e->getStatusCode();
+        } catch (\Throwable) {
+            $statusCode = 0;
+        }
+
+        // if ($statusCode == ResponseCode::ERR_EXPIRED_TOKEN->httpCode() || $e->getPrevious() instanceof TokenMismatchException) {
+        if ($e->getPrevious() instanceof TokenMismatchException) {
+            return new static(ResponseCode::ERR_EXPIRED_TOKEN, $e->getMessage(), previous: $e);
+        }
+
         if ($e instanceof ModelNotFoundException) {
             return new static(ResponseCode::ERR_ENTITY_NOT_FOUND, ResponseCode::ERR_ENTITY_NOT_FOUND->message(), previous: $e);
         }

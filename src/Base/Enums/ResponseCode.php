@@ -20,6 +20,7 @@ enum ResponseCode implements ResponseCodeInterface
     case ERR_INVALID_IP_ADDRESS;
     case ERR_MISSING_SIGNATURE_HEADER;
     case ERR_INVALID_SIGNATURE_HEADER;
+    case ERR_EXPIRED_TOKEN;
     case ERR_INVALID_OPERATION;
     case ERR_ENTITY_NOT_FOUND;
     case ERR_ROUTE_NOT_FOUND;
@@ -46,6 +47,7 @@ enum ResponseCode implements ResponseCodeInterface
             self::ERR_VALIDATION => Response::HTTP_UNPROCESSABLE_ENTITY,
             self::ERR_INVALID_OPERATION => Response::HTTP_EXPECTATION_FAILED,
             self::ERR_ENTITY_NOT_FOUND,
+            self::ERR_EXPIRED_TOKEN => 419, // 419: Laravel Page Expired
             self::ERR_ROUTE_NOT_FOUND => Response::HTTP_NOT_FOUND,
             self::ERR_UNKNOWN,
             self::ERR_METHOD_NOT_IMPLEMENTED => Response::HTTP_INTERNAL_SERVER_ERROR,

@@ -63,11 +63,11 @@ class Response implements Responsable
     {
         $payload = match (true) {
             $this->data instanceof Paginator,
-            $this->data instanceof Arrayable => $this->data->toArray(),
+                $this->data instanceof Arrayable => $this->data->toArray(),
             ($this->data?->resource ?? null) instanceof AbstractPaginator => array_merge(
-                    $this->data->resource->toArray(),
-                    $this->getData()
-                ),
+                $this->data->resource->toArray(),
+                $this->getData()
+            ),
             default => $this->data,
         };
 
@@ -103,7 +103,7 @@ class Response implements Responsable
         // return array_merge($resp, ['payload' => $this->data]);
     }
 
-    private function getResponseNormal(array|null $payload): array
+    private function getResponseNormal(JsonResource|ResourceCollection|array|null $payload): array
     {
         $resp = [
             config('koffinate.base.result.rc_wrapper') => $this->code->name,
