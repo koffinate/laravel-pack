@@ -28,11 +28,13 @@ class Response implements Responsable
      * @param JsonResource|ResourceCollection|Arrayable|LengthAwarePaginator|CursorPaginator|array|string|null $data
      * @param string|null $message
      * @param ResponseCodeInterface $code
+     * @param array $extra
      */
     public function __construct(
         protected JsonResource|ResourceCollection|Arrayable|LengthAwarePaginator|CursorPaginator|array|string|null $data = null,
         protected string|null $message = null,
         protected ResponseCodeInterface $code = ResponseCode::SUCCESS,
+        protected array $extra = [],
     ) {
         //
     }
@@ -105,11 +107,11 @@ class Response implements Responsable
 
     private function getResponseNormal(JsonResource|ResourceCollection|array|null $payload): array
     {
-        $resp = [
+        $resp = array_merge([
             config('koffinate.base.result.rc_wrapper') => $this->code->name,
             'message' => $this->getMessage(),
             'timestamp' => now(),
-        ];
+        ], $this->extra);
 
         $payloadWrapper = config('koffinate.base.result.payload_wrapper');
         if ($payloadWrapper) {

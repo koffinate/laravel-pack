@@ -127,7 +127,7 @@ class KfnException extends \Exception implements Arrayable, Responsable
         $apiPrefixes = collect((array) config('koffinate.base.api_prefixes', []));
         $apiPrefixes->each(fn ($it) => $apiPrefixes->add($it . '/*'));
 
-        if ((! $e instanceof static) && $request->is($apiPrefixes->toArray())) {
+        if ((! $e instanceof static) && ($request->is($apiPrefixes->toArray()) || $request->ajax())) {
             $e = static::mapToException($request, $e);
         }
 
