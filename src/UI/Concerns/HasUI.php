@@ -3,10 +3,21 @@
 namespace Kfn\UI\Concerns;
 
 use Exception;
+use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Fluent;
+use Kfn\Base\Contracts\ResponseCodeInterface;
+use Kfn\Base\Enums\ResponseCode;
+use Kfn\UI\Enums\RenderType;
+use Kfn\UI\Enums\UIType;
+use Kfn\UI\Response;
 use Throwable;
 use Yajra\DataTables\Contracts\DataTableButtons;
 
@@ -70,15 +81,28 @@ trait HasUI
      */
     private DataTableButtons|null $kfnTable = null;
 
+    protected function response(
+        array|string|JsonResource|ResourceCollection|Arrayable|Paginator|CursorPaginator|null $data = null,
+        string|null $message = null,
+        ResponseCodeInterface $rc = ResponseCode::SUCCESS,
+    ): Response {
+        return new Response($data, $message, $rc);
+    }
+
     /**
      * Serve blade template.
      *
      * @param  string  $view
+     * @param  bool  $asResponse
      *
-     * @return View|\Inertia\Response
+     * @return View|Response|\Inertia\Response
      */
-    protected function view(string $view): View|\Inertia\Response
+    protected function view(string $view, bool|null $asResponse = null): View|Response|\Inertia\Response
     {
+        $renderAsResponse = is_bool($asResponse)
+            ? $asResponse
+            : in_array(config('koffinate.ui.render_type'), [RenderType::RESPONSE, RenderType::RESPONSE->value]);
+
         $this->share();
 
         if ($this->viewDomain) {
@@ -89,15 +113,26 @@ trait HasUI
             $view = preg_replace('/(\.)+$/i', '', $this->viewPrefix).'.'.$view;
         }
 
-        if (class_exists('Inertia\Inertia') && 'inertia' === config('koffinate.ui.breeze.type')) {
-            return \Inertia\Inertia::render($view, $this->controllerData);
+        if (in_array(config('koffinate.ui.type'), [UIType::INERTIA, UIType::INERTIA->value]) && class_exists('Inertia\Inertia')) {
+            return $this->renderingView(\Inertia\Inertia::render($view, $this->controllerData), asResponse: $renderAsResponse);
         }
 
         if (property_exists($this, 'kfnTable') && $this->kfnTable instanceof DataTableButtons) {
-            return $this->kfnTable->render($view, $this->controllerData);
+            return $this->renderingView($this->kfnTable->render($view, $this->controllerData), asResponse: $renderAsResponse);
         }
 
-        return view($view, $this->controllerData);
+        return $this->renderingView($view, $this->controllerData, $renderAsResponse);
+    }
+
+    protected function renderingView(string|View|\Inertia\Response $view, array $data = [], bool $asResponse = false): View|Response|\Inertia\Response
+    {
+        if ($asResponse) {
+            $resp = new Response();
+            return $resp->view($view, $data);
+        }
+        return is_string($view)
+            ? view($view, $data)
+            : $view;
     }
 
     /**

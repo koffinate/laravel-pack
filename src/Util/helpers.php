@@ -1,7 +1,9 @@
 <?php
 
 use Illuminate\Contracts\Database;
-use Illuminate\Support\{Carbon, Fluent, Str};
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Fluent;
+use Illuminate\Support\Str;
 
 if (!function_exists('f')) {
     /**
@@ -212,9 +214,10 @@ if (!function_exists('fluent')) {
      * @return Fluent
      * @throws Throwable
      */
-    function fluent(array|object|null &$data = null): Fluent
+    function fluent(array|object|null $data = null): Fluent
     {
-        return toFluent($data);
+        $tmpData = $data;
+        return toFluent($tmpData);
     }
 }
 
@@ -261,11 +264,11 @@ if (!function_exists('hasRoute')) {
     /**
      * Existing Route by Name.
      *
-     * @param  string  $name
+     * @param  string|array  $name
      *
      * @return bool
      */
-    function hasRoute(string $name): bool
+    function hasRoute(string|array $name): bool
     {
         return app('router')->has($name);
     }
@@ -284,7 +287,7 @@ if (!function_exists('routed')) {
      */
     function routed(string $name, string|array $params = [], bool $absolute = true): string
     {
-        if (app('router')->has($name)) {
+        if (hasRoute($name)) {
             return app('url')->route($name, $params, $absolute);
         }
 

@@ -81,22 +81,18 @@ if (!function_exists('vendor')) {
      */
     function vendor(string $path): string
     {
-        $vendorPath = config('koffinate.core.url.vendor');
-        $vendorPath = $vendorPath !== '' ? $vendorPath : cachedAsset('vendor');
+        $vendorPath = config('koffinate.ui.url.vendor');
+        $vendorPath = $vendorPath !== '' ? $vendorPath : '/vendor';
 
         if (preg_match('/(:\/\/)+/i', $path, $matches, PREG_UNMATCHED_AS_NULL, 1)) {
+            $pattern = ['/^(vendor:\/\/)/i'];
+            $isVendorPath = preg_match($pattern[0], $path, flags: PREG_UNMATCHED_AS_NULL, offset: 1);
+            $pattern[] = '/^(asset:\/\/)/i';
             $replacedCount = 0;
-            $pattern = '/^(vendor:\/\/)/i';
-            $path = preg_replace($pattern, '', $path, -1, $replacedCount);
-            if ($replacedCount > 0) {
-                $vendorPath .= '/assets';
-            }
 
-            $replacedCount = 0;
-            $pattern = '/^(asset:\/\/)/i';
             $path = preg_replace($pattern, '', $path, -1, $replacedCount);
             if ($replacedCount > 0) {
-                $vendorPath = cachedAsset('');
+                $vendorPath = $isVendorPath ? $vendorPath.'/assets' : '';
             }
         }
 
@@ -104,7 +100,7 @@ if (!function_exists('vendor')) {
             $path = preg_replace('/(app)((\.min)?\.css)$/i', '$1-dev$2', $path);
         }
 
-        return $vendorPath . '/' . $path;
+        return cachedAsset($vendorPath . '/' . $path);
     }
 }
 
@@ -118,7 +114,7 @@ if (!function_exists('document')) {
      */
     function document(string $path): string
     {
-        return config('koffinate.core.url.document', asset('files')) . "/{$path}";
+        return cachedAsset(config('koffinate.ui.url.document', '/files') . "/{$path}");
     }
 }
 
@@ -180,7 +176,7 @@ if (!function_exists('plugins')) {
         $rs = fluent($rs);
 
         if ($assetType == 'vite') {
-            $css = $rs->get('css');
+            $css = $rs->get('css', '');
             $css = !empty($css)
                 ? app(Illuminate\Foundation\Vite::class)($css)->toHtml()
                 : '';
@@ -189,7 +185,7 @@ if (!function_exists('plugins')) {
                 $css .= implode('', (array) $httpCss);
             }
 
-            $js = $rs->get('js');
+            $js = $rs->get('js', '');
             $js = !empty($js)
                 ? app(Illuminate\Foundation\Vite::class)($js)->toHtml()
                 : '';
@@ -209,7 +205,8 @@ if (!function_exists('plugins')) {
             }
         }
 
-        View::share(['pluginCss' => $css ?? '', 'pluginJs' => $js ?? '']);
+        view()->share('pluginCss', $css ?? '');
+        view()->share('pluginJs', $js ?? '');
     }
 }
 
@@ -278,7 +275,7 @@ if (!function_exists('pluginAssets')) {
         $httpPattern = '/^(http[s?]:)/i';
         $jsType = config('koffinate.plugins.script_type');
         if (!empty($jsType)) {
-            $jsType = "type='{$jsType}' ";
+            $jsType = " type='{$jsType}'";
         }
 
         $rs = [];
@@ -289,7 +286,9 @@ if (!function_exists('pluginAssets')) {
                     $legacyCondition = null;
                     if ($t === 'legacy') {
                         $legacyCondition = config("{$package}{$name}.legacy")['condition'];
-                        $rs[$t] .= $legacyCondition[0];
+                        if ($legacyCondition) {
+                            $rs[$t] .= $legacyCondition[0];
+                        }
                     }
 
                     foreach (config("{$package}{$name}.{$t}") as $file) {
@@ -303,13 +302,10 @@ if (!function_exists('pluginAssets')) {
                             };
                         }
 
-                        if ($src) {
-                            if ($t === 'css') {
-                                $rs[$t] .= "<link href='{$src}' rel='stylesheet'>";
-                            }
-                            if ($t === 'js') {
-                                $rs[$t] .= "<script {$jsType}src='{$src}'></script>";
-                            }
+                        if ($src && in_array($t, ['css', 'js'])) {
+                            $rs[$t] .= 'css' === $t
+                                ? "<link href='{$src}' rel='stylesheet'>"
+                                : "<script src='{$src}'{$jsType}></script>";
                         }
 
                         unset($src);
@@ -640,8 +636,12 @@ if (!function_exists('cachedAsset')) {
         $asset = str($path)->is('/^https?:\/\//i')
             ? $path
             : asset($path, $secure);
+        $version = config('cache.version');
+        if (!$version) {
+            $version = cache()->flexible('kfn-cache-version', [60, 70], fn () => uniqid());
+        }
 
-        return $asset . '?_v=' . config('cache.version', time());
+        return $asset . '?_v=' . $version;
     }
 }
 
