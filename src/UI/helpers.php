@@ -1,8 +1,10 @@
 <?php
 
 use Illuminate\Contracts\Pagination;
-use Illuminate\Contracts\Support\{Arrayable,Htmlable};
-use Illuminate\Support\Facades\{Session,View};
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Support\Htmlable;
+use Kfn\UI\ViewAssetManager;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\ViewErrorBag;
 
 if (!function_exists('disguiseText')) {
@@ -31,6 +33,17 @@ if (!function_exists('disguiseText')) {
             }
         }
         return $disguiseText;
+    }
+}
+
+if (!function_exists('obscureText')) {
+    /**
+     * @param string|int|float $plain
+     * @return string
+     */
+    function obscureText(string|int|float $plain): string
+    {
+        return disguiseText($plain);
     }
 }
 
@@ -81,26 +94,7 @@ if (!function_exists('vendor')) {
      */
     function vendor(string $path): string
     {
-        $vendorPath = config('koffinate.ui.url.vendor');
-        $vendorPath = $vendorPath !== '' ? $vendorPath : '/vendor';
-
-        if (preg_match('/(:\/\/)+/i', $path, $matches, PREG_UNMATCHED_AS_NULL, 1)) {
-            $pattern = ['/^(vendor:\/\/)/i'];
-            $isVendorPath = preg_match($pattern[0], $path, flags: PREG_UNMATCHED_AS_NULL, offset: 1);
-            $pattern[] = '/^(asset:\/\/)/i';
-            $replacedCount = 0;
-
-            $path = preg_replace($pattern, '', $path, -1, $replacedCount);
-            if ($replacedCount > 0) {
-                $vendorPath = $isVendorPath ? $vendorPath.'/assets' : '';
-            }
-        }
-
-        if (isDev() && preg_match('/(app)((\.min)?\.css)$/i', $path)) {
-            $path = preg_replace('/(app)((\.min)?\.css)$/i', '$1-dev$2', $path);
-        }
-
-        return cachedAsset($vendorPath . '/' . $path);
+        return ViewAssetManager::vendor($path);
     }
 }
 
@@ -114,7 +108,7 @@ if (!function_exists('document')) {
      */
     function document(string $path): string
     {
-        return cachedAsset(config('koffinate.ui.url.document', '/files') . "/{$path}");
+        return ViewAssetManager::document($path);
     }
 }
 
@@ -124,201 +118,41 @@ if (!function_exists('plugins')) {
      * retrieving from config's definitions.
      *
      * @param  string|array|null  $name
-     * @param  string  $base
-     * @param  string|array  $type
+     * @param  string  $source
      *
-     * @return void
-     * @throws Throwable
+     * @return \Kfn\UI\Contracts\ViewAssetManager
      */
-    function plugins(string|array|null $name = null, string $base = 'local', string|array $type = ['css', 'js']): void
+    function plugins(string|array|null $name = null, string $source = 'local'): \Kfn\UI\Contracts\ViewAssetManager
     {
-        if (!$name) {
-            return;
+        $plugin = ViewAssetManager::init();
+        if ($name) {
+            return $plugin->add($name, $source);
         }
-        if (!in_array($base, ['vendor', 'local'])) {
-            return;
-        }
-
-        $assetType = config('koffinate.plugins.asset_type');
-        $name = (array)$name;
-        $type = (array)$type;
-
-        $rs = [];
-        if ($assetType == 'vite') {
-            foreach ($name as $pkgKey => $pkgVal) {
-                $rs = array_merge_recursive(
-                    $rs,
-                    viteAssets(names: $pkgVal, type: $type)
-                );
-            }
-        } else {
-            foreach ($name as $pkgKey => $pkgVal) {
-                if (is_array($pkgVal)) {
-                    $rs = array_merge_recursive(
-                        $rs,
-                        pluginAssets(names: $pkgKey, base: $base, type: $type)
-                    );
-
-                    foreach ($pkgVal as $pKey => $pVal) {
-                        $rs = array_merge_recursive(
-                            $rs,
-                            pluginAssets(names: $pVal, base: $base, type: $type, parent: $pkgKey.'.'.$pKey.'.')
-                        );
-                    }
-                } else {
-                    $rs = array_merge_recursive(
-                        $rs,
-                        pluginAssets(names: $pkgVal, base: $base, type: $type)
-                    );
-                }
-            }
-        }
-        $rs = fluent($rs);
-
-        if ($assetType == 'vite') {
-            $css = $rs->get('css', '');
-            $css = !empty($css)
-                ? app(Illuminate\Foundation\Vite::class)($css)->toHtml()
-                : '';
-            $httpCss = $rs->get('http_css');
-            if (!empty($httpCss)) {
-                $css .= implode('', (array) $httpCss);
-            }
-
-            $js = $rs->get('js', '');
-            $js = !empty($js)
-                ? app(Illuminate\Foundation\Vite::class)($js)->toHtml()
-                : '';
-            $httpJs = $rs->get('http_js');
-            if (!empty($httpJs)) {
-                $js .= implode('', (array) $httpJs);
-            }
-
-        } else {
-            $css = $rs->get('css', '');
-            if (is_array($css)) {
-                $css = implode('', $css);
-            }
-            $js = $rs->get('js', '');
-            if (is_array($js)) {
-                $js = implode('', $js);
-            }
-        }
-
-        view()->share('pluginCss', $css ?? '');
-        view()->share('pluginJs', $js ?? '');
+        return $plugin;
     }
 }
 
-if (!function_exists('viteAssets')) {
+if (!function_exists('pluginScript')) {
     /**
-     * Retrieve Application Plugin's Assets.
-     * retrieving from config's definitions.
+     * Get Plugin Script.
      *
-     * @param  array|string  $names
-     * @param  array  $type
-     *
-     * @return array
+     * @return \Illuminate\Support\HtmlString
      */
-    function viteAssets(
-        array|string $names,
-        array $type = ['css', 'js'],
-    ): array {
-        $package = "koffinate.plugins.items.";
-        $httpPattern = '/^(http[s?]:)/i';
-        $rs = ['css' => [], 'js' => [], 'http_css' => '', 'http_js' => ''];
-        foreach ((array) $names as $name) {
-            foreach ($type as $t) {
-                if (config()->has("{$package}{$name}.{$t}")) {
-                    foreach ((array) config("{$package}{$name}.{$t}") as $file) {
-                        if (preg_match($httpPattern, $file)) {
-                            $rs['http_'.$t] .= match ($t) {
-                                'css' => "<link href='{$file}' rel='stylesheet'>",
-                                'js' => "<script type='module' src='{$file}'></script>",
-                            };
-                        } else {
-                            $rs[$t][] = $file;
-                        }
-                    }
-                }
-            }
-        }
-
-        return $rs;
+    function pluginScript(): \Illuminate\Support\HtmlString
+    {
+        return ViewAssetManager::script();
     }
 }
 
-if (!function_exists('pluginAssets')) {
+if (!function_exists('pluginStyle')) {
     /**
-     * Retrieve Application Plugin's Assets.
-     * retrieving from config's definitions.
+     * Get Plugin Style.
      *
-     * @param array|string $names
-     * @param string $base
-     * @param array $type
-     * @param string $parent
-     *
-     * @return array
+     * @return \Illuminate\Support\HtmlString
      */
-    function pluginAssets(
-        array|string $names,
-        string $base = 'local',
-        array  $type = ['css', 'js'],
-        string $parent = '',
-    ): array {
-        if (! is_array($names)) {
-            $names = (array) $names;
-        }
-
-        $localPath = preg_replace('/\/+$/', '', config('koffinate.plugins.base_path', 'plugins')) . '/';
-        $package = "koffinate.plugins.items.{$parent}";
-        $httpPattern = '/^(http[s?]:)/i';
-        $jsType = config('koffinate.plugins.script_type');
-        if (!empty($jsType)) {
-            $jsType = " type='{$jsType}'";
-        }
-
-        $rs = [];
-        foreach ($names as $name) {
-            foreach ($type as $t) {
-                $rs[$t] = '';
-                if (config()->has("{$package}{$name}.{$t}")) {
-                    $legacyCondition = null;
-                    if ($t === 'legacy') {
-                        $legacyCondition = config("{$package}{$name}.legacy")['condition'];
-                        if ($legacyCondition) {
-                            $rs[$t] .= $legacyCondition[0];
-                        }
-                    }
-
-                    foreach (config("{$package}{$name}.{$t}") as $file) {
-                        if (preg_match($httpPattern, $file)) {
-                            $src = $file;
-                        } else {
-                            $src = match ($base) {
-                                'vendor' => vendor($file),
-                                'local' => cachedAsset($localPath.$file),
-                                default => null,
-                            };
-                        }
-
-                        if ($src && in_array($t, ['css', 'js'])) {
-                            $rs[$t] .= 'css' === $t
-                                ? "<link href='{$src}' rel='stylesheet'>"
-                                : "<script src='{$src}'{$jsType}></script>";
-                        }
-
-                        unset($src);
-                    }
-
-                    if ($legacyCondition) {
-                        $rs[$t] .= $legacyCondition[1];
-                    }
-                }
-            }
-        }
-
-        return $rs;
+    function pluginStyle(): \Illuminate\Support\HtmlString
+    {
+        return ViewAssetManager::style();
     }
 }
 
