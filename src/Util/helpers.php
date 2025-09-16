@@ -5,9 +5,9 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Fluent;
 use Illuminate\Support\Str;
 
-if (!function_exists('f')) {
+if (! function_exists('f')) {
     /**
-     * Formatting text as HTML support
+     * Formatting text as HTML support.
      *
      * @param  string  $text
      *
@@ -19,7 +19,7 @@ if (!function_exists('f')) {
     }
 }
 
-if (!function_exists('prettySize')) {
+if (! function_exists('prettySize')) {
     /**
      * Human-readable file size.
      *
@@ -31,13 +31,13 @@ if (!function_exists('prettySize')) {
     function prettySize(int $bytes, int $decimals = 2): string
     {
         $sz = 'BKMGTPE';
-        $factor = (int)floor((strlen($bytes) - 1) / 3);
+        $factor = (int) floor((strlen($bytes) - 1) / 3);
 
         return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)).$sz[$factor];
     }
 }
 
-if (!function_exists('trimAll')) {
+if (! function_exists('trimAll')) {
     /**
      * @param  null|string  $string
      * @param  string  $type
@@ -49,10 +49,10 @@ if (!function_exists('trimAll')) {
      */
     function trimAll(?string $string, string $type = 'smart', string $pattern = '\W+'): string
     {
-        if (!$string || trim($string) == '') {
+        if (! $string || trim($string) == '') {
             return '';
         }
-        if (!in_array($type, ['smart', 'both', 'left', 'right', 'all'])) {
+        if (! in_array($type, ['smart', 'both', 'left', 'right', 'all'])) {
             throw new Exception('type of trim not valid, use smart|left|right|all instead.', 401);
         }
 
@@ -75,7 +75,7 @@ if (!function_exists('trimAll')) {
     }
 }
 
-if (!function_exists('carbon')) {
+if (! function_exists('carbon')) {
     /**
      * @param  string|DateTimeInterface|null  $datetime
      * @param  DateTimeZone|string|null  $timezone
@@ -89,10 +89,10 @@ if (!function_exists('carbon')) {
         string|null $locale = null,
     ): Carbon {
         if (auth()->check()) {
-            if (!$timezone) {
+            if (! $timezone) {
                 $timezone = auth()->user()?->timezone ?? null;
             }
-            if (!$locale) {
+            if (! $locale) {
                 $locale = auth()->user()?->locale ?? null;
             }
         }
@@ -114,7 +114,7 @@ if (!function_exists('carbon')) {
     }
 }
 
-if (!function_exists('carbonFormat')) {
+if (! function_exists('carbonFormat')) {
     /**
      * @param  string|DateTimeInterface|null  $datetime
      * @param  string  $isoFormat
@@ -177,7 +177,7 @@ if (!function_exists('carbonFormat')) {
     }
 }
 
-if (!function_exists('numberFormat')) {
+if (! function_exists('numberFormat')) {
     /**
      * @param  float|int|null  $number
      * @param  int  $decimal
@@ -186,14 +186,15 @@ if (!function_exists('numberFormat')) {
      */
     function numberFormat(float|int|null $number = null, int $decimal = 0): string
     {
-        if (!$number) {
+        if (! $number) {
             return '0';
         }
+
         return number_format($number, $decimal, ',', '.');
     }
 }
 
-if (!function_exists('toSentry')) {
+if (! function_exists('toSentry')) {
     /**
      * @param  Throwable  $throw
      *
@@ -201,13 +202,13 @@ if (!function_exists('toSentry')) {
      */
     function toSentry(Throwable $throw): void
     {
-        if (app()->bound('sentry') && !app()->isLocal()) {
+        if (app()->bound('sentry') && ! app()->isLocal()) {
             \Sentry\Laravel\Integration::captureUnhandledException($throw);
         }
     }
 }
 
-if (!function_exists('fluent')) {
+if (! function_exists('fluent')) {
     /**
      * @param  array|object|null  $data
      *
@@ -217,11 +218,12 @@ if (!function_exists('fluent')) {
     function fluent(array|object|null $data = null): Fluent
     {
         $tmpData = $data;
+
         return toFluent($tmpData);
     }
 }
 
-if (!function_exists('toFluent')) {
+if (! function_exists('toFluent')) {
     /**
      * @param  array|object|null  $data
      *
@@ -230,7 +232,7 @@ if (!function_exists('toFluent')) {
      */
     function toFluent(array|object|null &$data = null): Fluent
     {
-        if (!$data instanceof Fluent) {
+        if (! $data instanceof Fluent) {
             try {
                 $data = new Fluent($data ?? []);
             } catch (Exception $e) {
@@ -245,7 +247,7 @@ if (!function_exists('toFluent')) {
     }
 }
 
-if (!function_exists('throwOnDebug')) {
+if (! function_exists('throwOnDebug')) {
     /**
      * @param  Throwable  $throw
      *
@@ -260,7 +262,7 @@ if (!function_exists('throwOnDebug')) {
     }
 }
 
-if (!function_exists('hasRoute')) {
+if (! function_exists('hasRoute')) {
     /**
      * Existing Route by Name.
      *
@@ -274,7 +276,7 @@ if (!function_exists('hasRoute')) {
     }
 }
 
-if (!function_exists('routed')) {
+if (! function_exists('routed')) {
     /**
      * Existing Route by Name
      * with '#' fallback.
@@ -295,7 +297,7 @@ if (!function_exists('routed')) {
     }
 }
 
-if (!function_exists('to_routed')) {
+if (! function_exists('to_routed')) {
     /**
      * Existing Route by Name
      * with '#' fallback.
@@ -317,7 +319,7 @@ if (!function_exists('to_routed')) {
     }
 }
 
-if (!function_exists('activeRoute')) {
+if (! function_exists('activeRoute')) {
     /**
      * @param  string  $route
      * @param  string|array  $params
@@ -356,8 +358,8 @@ if (!function_exists('activeRoute')) {
                         // try to check param is enum type
                         try {
                             if ($requestRoute->parameter($key)->value && $requestRoute->parameter(
-                                    $key,
-                                )->value != $value) {
+                                $key,
+                            )->value != $value) {
                                 return false;
                             }
                         } catch (Exception $e) {
@@ -379,7 +381,7 @@ if (!function_exists('activeRoute')) {
     }
 }
 
-if (!function_exists('getRawSql')) {
+if (! function_exists('getRawSql')) {
     /**
      * @param  Database\Eloquent\Builder|Database\Query\Builder  $query
      *

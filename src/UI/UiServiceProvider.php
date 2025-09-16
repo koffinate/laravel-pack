@@ -38,12 +38,13 @@ class UiServiceProvider extends ServiceProvider
     {
         Blade::if('hasSections', function (string ...$sections): bool {
             $view = app('view');
+
             return (bool) collect($sections)->first(function ($section) use ($view) {
                 return ! empty(trim($view->yieldContent($section)));
             });
         });
 
-        Blade::if('hasStack', function($stackName) {
+        Blade::if('hasStack', function ($stackName) {
             return hasStack($stackName);
         });
 
@@ -51,6 +52,7 @@ class UiServiceProvider extends ServiceProvider
             if (! str($arguments)->contains(['[', ':'])) {
                 $arguments = "[{$arguments}]";
             }
+
             return "<?php plugins({$arguments}); ?>";
         });
 
@@ -58,6 +60,7 @@ class UiServiceProvider extends ServiceProvider
             $arguments = explode(',', $arguments, 3);
             $condition = $arguments[0] ?? false;
             $method = $arguments[1] ?? 'GET';
+
             return "<?= methodIf({$condition}, {$method}); ?>";
         });
 

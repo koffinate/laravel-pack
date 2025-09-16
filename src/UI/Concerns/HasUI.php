@@ -9,7 +9,6 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
-use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Fluent;
@@ -75,7 +74,7 @@ trait HasUI
     private array $reservedVariables = ['pageTitle', 'pageMeta'];
 
     /**
-     * Yajra Datatable wrapper
+     * Yajra Datatable wrapper.
      *
      * @var DataTableButtons|null
      */
@@ -128,8 +127,10 @@ trait HasUI
     {
         if ($asResponse) {
             $resp = new Response();
+
             return $resp->view($view, $data);
         }
+
         return is_string($view)
             ? view($view, $data)
             : $view;
@@ -155,7 +156,7 @@ trait HasUI
         $this->controllerData['activeUser'] = auth()->user();
         $this->controllerData['pageMeta'] = $this->pageMeta;
         $this->controllerData['breadCrumbs'] = $this->breadCrumbs ?? collect();
-        if (!array_key_exists('isEditMode', $this->controllerData)) {
+        if (! array_key_exists('isEditMode', $this->controllerData)) {
             $this->controllerData['isEditMode'] = false;
         }
 
@@ -241,6 +242,7 @@ trait HasUI
         } else {
             $this->controllerData['pageTitle'] = $title;
         }
+
         return $this;
     }
 
@@ -255,6 +257,7 @@ trait HasUI
     protected function setPageMeta(string $key, mixed $value): static
     {
         $this->pageMeta[$key] = $value;
+
         return $this;
     }
 
@@ -268,6 +271,7 @@ trait HasUI
     protected function setBreadCrumb(string|array $breadcrumb): static
     {
         $this->breadCrumbs = collect();
+
         return $this->addBreadCrumb($breadcrumb);
     }
 
@@ -287,6 +291,7 @@ trait HasUI
             }
             $this->breadCrumbs->add($this->breadCrumbFormat($val));
         }
+
         return $this;
     }
 
@@ -300,6 +305,7 @@ trait HasUI
     private function breadCrumbFormat(array $breadcrumb): Fluent
     {
         $default = ['title' => '', 'url' => '#'];
+
         return new Fluent(
             array_merge($default, Arr::only($breadcrumb, ['title', 'url']))
         );
@@ -328,17 +334,18 @@ trait HasUI
      */
     protected function setTable(mixed $table): void
     {
-        if (!$table instanceof DataTableButtons) {
+        if (! $table instanceof DataTableButtons) {
             throw_if(
                 app()->hasDebugModeEnabled(),
                 new Exception('Table must be instance of Yajra\DataTables\Contracts\DataTableButtons')
             );
+
             return;
         }
 
         if (request()->ajax() && request()->wantsJson()) {
             $table->render()->send();
-            exit();
+            exit;
         }
         $this->kfnTable = $table;
     }

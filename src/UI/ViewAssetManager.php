@@ -72,10 +72,10 @@ class ViewAssetManager implements \Kfn\UI\Contracts\ViewAssetManager
     public function add(string|array $name, string $source = 'local'): static
     {
         if (in_array($source, ['local', 'vendor'])) {
-            $availablePlugins = self::$availablePlugins->filter(fn($it, $key) => in_array($key, (array)$name));
+            $availablePlugins = self::$availablePlugins->filter(fn ($it, $key) => in_array($key, (array) $name));
             if ($availablePlugins->isNotEmpty()) {
                 self::$assets = self::$assets->merge(
-                    $availablePlugins->map(fn($it) => fluent($it)->set('source', $source))
+                    $availablePlugins->map(fn ($it) => fluent($it)->set('source', $source))
                 );
             }
         }
@@ -127,7 +127,7 @@ class ViewAssetManager implements \Kfn\UI\Contracts\ViewAssetManager
 
     /**
      * Get Script Assets.
-     * alias of script()
+     * alias of script().
      *
      * @return HtmlString
      */
@@ -152,7 +152,7 @@ class ViewAssetManager implements \Kfn\UI\Contracts\ViewAssetManager
 
     /**
      * Get Style Assets.
-     * alias of style()
+     * alias of style().
      *
      * @return HtmlString
      */
@@ -183,9 +183,9 @@ class ViewAssetManager implements \Kfn\UI\Contracts\ViewAssetManager
                     foreach ($asset->get($assetType) as $path) {
                         $result[$assetType] .= preg_match($this->httpPattern, $path)
                             ? (
-                            'css' === $assetType
-                                ? "<link href='{$path}' rel='stylesheet'>"
-                                : "<script type='{$scriptType}' src='{$path}'></script>"
+                                'css' === $assetType
+                                    ? "<link href='{$path}' rel='stylesheet'>"
+                                    : "<script type='{$scriptType}' src='{$path}'></script>"
                             )
                             : $vite($path)->toHtml();
                     }
@@ -208,16 +208,16 @@ class ViewAssetManager implements \Kfn\UI\Contracts\ViewAssetManager
 
         self::$assets->whenNotEmpty(function (Collection $assets) use (&$result) {
             $scriptType = self::$scriptType;
-            $localPath = preg_replace('/\/+$/', '', config('koffinate.plugins.base_path', 'plugins')) . '/';
+            $localPath = preg_replace('/\/+$/', '', config('koffinate.plugins.base_path', 'plugins')).'/';
 
             $assets->each(function ($asset) use ($scriptType, $localPath, &$result) {
-                if (!in_array($asset->get('source'), ['vendor', 'local'])) {
+                if (! in_array($asset->get('source'), ['vendor', 'local'])) {
                     return;
                 }
 
                 $legacyOpen = '';
                 $legacyClose = '';
-                if (!empty($legacy = $asset->get('legacy.condition'))) {
+                if (! empty($legacy = $asset->get('legacy.condition'))) {
                     $legacyOpen = $legacy[0] ?? '';
                     $legacyClose = $legacy[1] ?? '';
                 }
@@ -253,7 +253,7 @@ class ViewAssetManager implements \Kfn\UI\Contracts\ViewAssetManager
      */
     public static function document(string $path): string
     {
-        return cachedAsset(config('koffinate.ui.url.document', '/files') . "/{$path}");
+        return cachedAsset(config('koffinate.ui.url.document', '/files')."/{$path}");
     }
 
     /**
@@ -284,6 +284,6 @@ class ViewAssetManager implements \Kfn\UI\Contracts\ViewAssetManager
             $path = preg_replace('/(app)((\.min)?\.css)$/i', '$1-dev$2', $path);
         }
 
-        return cachedAsset($vendorPath . '/' . $path);
+        return cachedAsset($vendorPath.'/'.$path);
     }
 }
