@@ -23,7 +23,7 @@ class Request extends \Illuminate\Http\Request
     {
         $forceToJson = config('koffinate.base.force_json', false);
         $forceToJsonPrefixes = collect((array) config('koffinate.base.force_json_prefixes', []));
-        $forceToJsonPrefixes->each(fn ($it) => $forceToJsonPrefixes->add($it . '/*'));
+        $forceToJsonPrefixes->each(fn ($it) => $forceToJsonPrefixes->add($it.'/*'));
 
         return is_bool($forceToJson) && $forceToJson && $this->is($forceToJsonPrefixes->toArray()) || null;
     }

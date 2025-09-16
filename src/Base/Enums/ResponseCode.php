@@ -29,7 +29,6 @@ enum ResponseCode implements ResponseCodeInterface
     case ERR_METHOD_NOT_IMPLEMENTED;
     case ERR_ACTION_UNAUTHORIZED;
 
-
     /**
      * Determine httpCode from response code.
      *

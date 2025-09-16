@@ -65,7 +65,7 @@ class Response implements Responsable
     {
         $payload = match (true) {
             $this->data instanceof Paginator,
-                $this->data instanceof Arrayable => $this->data->toArray(),
+            $this->data instanceof Arrayable => $this->data->toArray(),
             ($this->data?->resource ?? null) instanceof AbstractPaginator => array_merge(
                 $this->data->resource->toArray(),
                 $this->getData()
@@ -144,21 +144,29 @@ class Response implements Responsable
                 $tmp = new Fluent($it);
                 $id = null;
                 $text = null;
-                if(! $tmp->offsetExists('id')) {
+                if (! $tmp->offsetExists('id')) {
                     $id = $tmp->get('key', $i);
                 }
-                if(! $tmp->offsetExists('text')) {
+                if (! $tmp->offsetExists('text')) {
                     $text = $tmp->offsetExists('name')
                         ? $tmp->get('name')
                         : $tmp->get('label', '');
                 }
 
                 if (is_array($it)) {
-                    if($id) $it['id'] = $id;
-                    if($text) $it['text'] = $text;
+                    if ($id) {
+                        $it['id'] = $id;
+                    }
+                    if ($text) {
+                        $it['text'] = $text;
+                    }
                 } elseif (is_object($it)) {
-                    if($id) $it->id = $id;
-                    if($text) $it->text = $text;
+                    if ($id) {
+                        $it->id = $id;
+                    }
+                    if ($text) {
+                        $it->text = $text;
+                    }
                 }
 
                 return $it;

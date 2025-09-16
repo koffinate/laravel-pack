@@ -3,7 +3,7 @@
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-if (!function_exists('user')) {
+if (! function_exists('user')) {
     /**
      * @param string|null $guard
      * @return Authenticatable|null
@@ -16,7 +16,7 @@ if (!function_exists('user')) {
     }
 }
 
-if (!function_exists('fromResource')) {
+if (! function_exists('fromResource')) {
     /**
      * Generate a collection from resource.
      *

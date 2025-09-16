@@ -33,11 +33,11 @@ class KfnException extends \Exception implements Arrayable, Responsable
      * @param  \Throwable|null  $previous
      */
     public function __construct(
-        public ResponseCodeInterface  $rc = ResponseCode::ERR_UNKNOWN,
-        ?string              $message = null,
+        public ResponseCodeInterface $rc = ResponseCode::ERR_UNKNOWN,
+        ?string $message = null,
         protected array|null $data = null,
         protected array|null $errors = null,
-        ?Throwable           $previous = null
+        ?Throwable $previous = null
     ) {
         if (is_null($message)) {
             $message = $rc->message();
@@ -70,7 +70,7 @@ class KfnException extends \Exception implements Arrayable, Responsable
         ];
 
         if ($this->errors) {
-            $resp["errors"] = $this->errors;
+            $resp['errors'] = $this->errors;
         }
 
         if (config('app.debug') && $this->getPrevious() instanceof Throwable) {
@@ -125,7 +125,7 @@ class KfnException extends \Exception implements Arrayable, Responsable
     public static function renderException(Request $request, Throwable $e): Response|JsonResponse|SymfonyResponse
     {
         $apiPrefixes = collect((array) config('koffinate.base.api_prefixes', []));
-        $apiPrefixes->each(fn ($it) => $apiPrefixes->add($it . '/*'));
+        $apiPrefixes->each(fn ($it) => $apiPrefixes->add($it.'/*'));
 
         if ((! $e instanceof static) && ($request->is($apiPrefixes->toArray()) || $request->ajax())) {
             $e = static::mapToException($request, $e);
@@ -185,7 +185,7 @@ class KfnException extends \Exception implements Arrayable, Responsable
 
         return new static(
             rc: ResponseCode::ERR_UNKNOWN,
-            message: "Something went wrong",
+            message: 'Something went wrong',
             data: [
                 'base_url' => $request->getBaseUrl(),
                 'path' => $request->getUri(),

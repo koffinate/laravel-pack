@@ -1,6 +1,5 @@
 <?php
 
-
 use Illuminate\Support\ServiceProvider;
 
 class DatabaseServiceProvider extends ServiceProvider
