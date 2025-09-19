@@ -36,6 +36,21 @@ trait InteractWithUILink
     }
 
     /**
+     * Set Link.
+     *
+     * @param  string  $name
+     * @param  string  $link
+     *
+     * @return static
+     */
+    protected function setLink(string $name, string $link): static
+    {
+        $this->setControllerButton(str($name.'Link')->lower()->camel()->toString(), $link);
+
+        return $this;
+    }
+
+    /**
      * Set Back Link.
      *
      * @param  string  $link

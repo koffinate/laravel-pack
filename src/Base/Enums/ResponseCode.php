@@ -17,6 +17,7 @@ enum ResponseCode implements ResponseCodeInterface
     case CREATED;
     case ERR_VALIDATION;
     case ERR_AUTHENTICATION;
+    case ERR_BAD_REQUEST;
     case ERR_INVALID_IP_ADDRESS;
     case ERR_MISSING_SIGNATURE_HEADER;
     case ERR_INVALID_SIGNATURE_HEADER;

@@ -5,6 +5,7 @@ namespace Kfn\UI;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Support\MessageProvider;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -102,6 +103,9 @@ class Response extends \Kfn\Base\Response implements Responsable
                 case 'w_cookies':
                     $redirect->withCookies($wValue);
                     break;
+                case 'w_errors':
+                    $redirect->withErrors($wValue['property'], $wValue['key']);
+                    break;
                 default:
                     $redirect->with($wKey, $wValue);
             }
@@ -197,6 +201,16 @@ class Response extends \Kfn\Base\Response implements Responsable
     public function with(string|array $key, mixed $value = null): static
     {
         $this->with[$key] = $value;
+
+        return $this;
+    }
+
+    public function withErrors(MessageProvider|array|string $provider, $key = 'default'): static
+    {
+        $this->with['w_errors'] = [
+            'provider' => $provider,
+            'key' => $key,
+        ];
 
         return $this;
     }
