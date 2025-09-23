@@ -66,7 +66,7 @@ class BaseException extends \Exception
 
         return new KfnException(
             rc: ResponseCode::ERR_UNKNOWN,
-            message: "Something went wrong",
+            message: 'Something went wrong',
             data: [
                 'base_url' => $request->getBaseUrl(),
                 'path' => $request->getUri(),

@@ -5,6 +5,7 @@ namespace Kfn\UI;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Support\MessageProvider;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -45,16 +46,17 @@ class Response extends \Kfn\Base\Response implements Responsable
             if (in_array($this->redirect, ['back', 'to', 'intended', 'action', 'route'])) {
                 $this->handleRedirect($request);
             }
-            if (!is_null($this->view)) {
+            if (! is_null($this->view)) {
                 return new HttpResponse($this->handleView());
             }
         }
+
         return parent::toResponse($request);
     }
 
     private function handleRedirect(Request $request): void
     {
-        if ('route' === $this->redirect && !app('router')->has($this->redirectOption->get('target'))) {
+        if ('route' === $this->redirect && ! app('router')->has($this->redirectOption->get('target'))) {
             $this->redirect = 'back';
         }
 
@@ -101,6 +103,9 @@ class Response extends \Kfn\Base\Response implements Responsable
                 case 'w_cookies':
                     $redirect->withCookies($wValue);
                     break;
+                case 'w_errors':
+                    $redirect->withErrors($wValue['property'], $wValue['key']);
+                    break;
                 default:
                     $redirect->with($wKey, $wValue);
             }
@@ -108,6 +113,7 @@ class Response extends \Kfn\Base\Response implements Responsable
 
         if ($request->ajax()) {
             $this->extra['redirect'] = $redirect->getTargetUrl();
+
             return;
         }
 
@@ -123,6 +129,7 @@ class Response extends \Kfn\Base\Response implements Responsable
             $this->viewOption = $this->view->viewOption;
             $this->view = $this->view->view;
         }
+
         return view($this->view, $this->viewOption->get('data') ?: [])->render();
     }
 
@@ -132,6 +139,7 @@ class Response extends \Kfn\Base\Response implements Responsable
         $this->viewOption['data'] = $data;
         $this->viewOption['status'] = $status;
         $this->viewOption['headers'] = $headers;
+
         return $this;
     }
 
@@ -142,6 +150,7 @@ class Response extends \Kfn\Base\Response implements Responsable
         $this->redirectOption['status'] = $status;
         $this->redirectOption['headers'] = $headers;
         $this->redirectOption['secure'] = $secure;
+
         return $this;
     }
 
@@ -152,6 +161,7 @@ class Response extends \Kfn\Base\Response implements Responsable
         $this->redirectOption['status'] = $status;
         $this->redirectOption['headers'] = $headers;
         $this->redirectOption['secure'] = $secure;
+
         return $this;
     }
 
@@ -162,6 +172,7 @@ class Response extends \Kfn\Base\Response implements Responsable
         $this->redirectOption['params'] = $parameters;
         $this->redirectOption['status'] = $status;
         $this->redirectOption['headers'] = $headers;
+
         return $this;
     }
 
@@ -172,6 +183,7 @@ class Response extends \Kfn\Base\Response implements Responsable
         $this->redirectOption['params'] = $parameters;
         $this->redirectOption['status'] = $status;
         $this->redirectOption['headers'] = $headers;
+
         return $this;
     }
 
@@ -182,30 +194,45 @@ class Response extends \Kfn\Base\Response implements Responsable
         $this->redirectOption['status'] = $status;
         $this->redirectOption['headers'] = $headers;
         $this->redirectOption['fallback'] = $fallback;
+
         return $this;
     }
 
     public function with(string|array $key, mixed $value = null): static
     {
         $this->with[$key] = $value;
+
+        return $this;
+    }
+
+    public function withErrors(MessageProvider|array|string $provider, $key = 'default'): static
+    {
+        $this->with['w_errors'] = [
+            'provider' => $provider,
+            'key' => $key,
+        ];
+
         return $this;
     }
 
     public function withInput(array|null $input = null): static
     {
         $this->with['w_input'] = $input;
+
         return $this;
     }
 
     public function withCookies(array $cookies): static
     {
         $this->with['w_cookies'] = $cookies;
+
         return $this;
     }
 
     public function withCookie(string|Cookie $cookie): static
     {
         $this->with['w_cookie'] = $cookie;
+
         return $this;
     }
 }

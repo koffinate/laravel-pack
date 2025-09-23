@@ -21,7 +21,7 @@ trait InteractWithUILink
     }
 
     /**
-     * Load default controller buttons
+     * Load default controller buttons.
      *
      * @return void
      */
@@ -36,6 +36,21 @@ trait InteractWithUILink
     }
 
     /**
+     * Set Link.
+     *
+     * @param  string  $name
+     * @param  string  $link
+     *
+     * @return static
+     */
+    protected function setLink(string $name, string $link): static
+    {
+        $this->setControllerButton(str($name.'Link')->lower()->camel()->toString(), $link);
+
+        return $this;
+    }
+
+    /**
      * Set Back Link.
      *
      * @param  string  $link
@@ -45,6 +60,7 @@ trait InteractWithUILink
     protected function setBackLink(string $link): static
     {
         $this->setControllerButton('backLink', $link);
+
         return $this;
     }
 
@@ -58,6 +74,7 @@ trait InteractWithUILink
     protected function setCreateLink(string $link): static
     {
         $this->setControllerButton('createLink', $link);
+
         return $this;
     }
 
@@ -71,6 +88,7 @@ trait InteractWithUILink
     protected function setDetailLink(string $link): static
     {
         $this->setControllerButton('detailLink', $link);
+
         return $this;
     }
 
@@ -84,6 +102,7 @@ trait InteractWithUILink
     protected function setDeleteLink(string $link): static
     {
         $this->setControllerButton('deleteLink', $link);
+
         return $this;
     }
 
@@ -97,6 +116,7 @@ trait InteractWithUILink
     protected function setSaveLink(string $link): static
     {
         $this->setControllerButton('saveLink', $link);
+
         return $this;
     }
 
@@ -110,6 +130,7 @@ trait InteractWithUILink
     protected function setEditLink(string $link): static
     {
         $this->setControllerButton('editLink', $link);
+
         return $this;
     }
 }

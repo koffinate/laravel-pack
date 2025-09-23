@@ -48,7 +48,7 @@ interface ViewAssetManager
 
     /**
      * Get Script Assets.
-     * alias of script()
+     * alias of script().
      *
      * @return HtmlString
      */
@@ -63,7 +63,7 @@ interface ViewAssetManager
 
     /**
      * Get Style Assets.
-     * alias of style()
+     * alias of style().
      *
      * @return HtmlString
      */

@@ -5,7 +5,7 @@ namespace Kfn\Base\Contracts;
 interface ResponseResultInterface
 {
     /**
-     * Wrap response data
+     * Wrap response data.
      *
      * @return string
      */

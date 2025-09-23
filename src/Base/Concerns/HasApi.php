@@ -15,7 +15,7 @@ trait HasApi
     protected array $responseMessages;
 
     /**
-     * Use to get response message
+     * Use to get response message.
      *
      * @param  string  $context
      *
@@ -35,10 +35,9 @@ trait HasApi
      */
     public function response(
         JsonResource|ResourceCollection|Arrayable|Pagination\Paginator|Pagination\CursorPaginator|array|string|null $data = null,
-        ?string                                                                                                     $message = null,
-        ResponseCode                                                                                                $rc = ResponseCode::SUCCESS,
+        ?string $message = null,
+        ResponseCode $rc = ResponseCode::SUCCESS,
     ): Response {
         return new Response($data, $message, $rc);
     }
-
 }

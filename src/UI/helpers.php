@@ -3,11 +3,11 @@
 use Illuminate\Contracts\Pagination;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Htmlable;
-use Kfn\UI\ViewAssetManager;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\ViewErrorBag;
+use Kfn\UI\ViewAssetManager;
 
-if (!function_exists('disguiseText')) {
+if (! function_exists('disguiseText')) {
     /**
      * @param string|int|float $plain
      * @return string
@@ -25,18 +25,19 @@ if (!function_exists('disguiseText')) {
                 $disguiseText = $disguise;
             } else {
                 $disguiseText = preg_replace(
-                /** @lang text */
+                    /** @lang text */
                     '/^(\+?\w{3})(\N+)(\w{2})$/',
-                    '$1' . $disguise . '$3',
+                    '$1'.$disguise.'$3',
                     $disguiseText
                 );
             }
         }
+
         return $disguiseText;
     }
 }
 
-if (!function_exists('obscureText')) {
+if (! function_exists('obscureText')) {
     /**
      * @param string|int|float $plain
      * @return string
@@ -47,7 +48,7 @@ if (!function_exists('obscureText')) {
     }
 }
 
-if (!function_exists('setDefaultRequest')) {
+if (! function_exists('setDefaultRequest')) {
     /**
      * Set Default Value for Request Input.
      *
@@ -78,13 +79,14 @@ if (! function_exists('hasSections')) {
     function hasSections(string ...$sections): bool
     {
         $view = app('view');
+
         return (bool) collect($sections)->first(function ($section) use ($view) {
             return ! empty(trim($view->yieldContent($section)));
         });
     }
 }
 
-if (!function_exists('vendor')) {
+if (! function_exists('vendor')) {
     /**
      * Generate an asset path for the application.
      *
@@ -98,7 +100,7 @@ if (!function_exists('vendor')) {
     }
 }
 
-if (!function_exists('document')) {
+if (! function_exists('document')) {
     /**
      * Generate an asset path for the application.
      *
@@ -112,7 +114,7 @@ if (!function_exists('document')) {
     }
 }
 
-if (!function_exists('plugins')) {
+if (! function_exists('plugins')) {
     /**
      * Retrieve Application Plugins.
      * retrieving from config's definitions.
@@ -128,11 +130,12 @@ if (!function_exists('plugins')) {
         if ($name) {
             return $plugin->add($name, $source);
         }
+
         return $plugin;
     }
 }
 
-if (!function_exists('pluginScript')) {
+if (! function_exists('pluginScript')) {
     /**
      * Get Plugin Script.
      *
@@ -144,7 +147,7 @@ if (!function_exists('pluginScript')) {
     }
 }
 
-if (!function_exists('pluginStyle')) {
+if (! function_exists('pluginStyle')) {
     /**
      * Get Plugin Style.
      *
@@ -156,7 +159,7 @@ if (!function_exists('pluginStyle')) {
     }
 }
 
-if (!function_exists('isDev')) {
+if (! function_exists('isDev')) {
     /**
      * Development Mode Checker.
      *
@@ -168,13 +171,13 @@ if (!function_exists('isDev')) {
             return Session::get('dev_mode', false);
         }
 
-        $dev = (string)env('APP_DEV_MODE', 'off');
+        $dev = (string) env('APP_DEV_MODE', 'off');
 
         return in_array(strtolower($dev), ['true', '1', 'on']);
     }
 }
 
-if (!function_exists('activeCss')) {
+if (! function_exists('activeCss')) {
     /**
      * @param string $route
      * @param array $params
@@ -188,7 +191,7 @@ if (!function_exists('activeCss')) {
     }
 }
 
-if (!function_exists('getErrors')) {
+if (! function_exists('getErrors')) {
     /**
      * Get validation errors.
      *
@@ -199,7 +202,7 @@ if (!function_exists('getErrors')) {
     function getErrors(?string $bag = null): ?ViewErrorBag
     {
         $errors = session('errors');
-        if (!$errors instanceof ViewErrorBag) {
+        if (! $errors instanceof ViewErrorBag) {
             return null;
         }
         if ($bag) {
@@ -213,7 +216,7 @@ if (!function_exists('getErrors')) {
     }
 }
 
-if (!function_exists('hasError')) {
+if (! function_exists('hasError')) {
     /**
      * Exist validation error.
      *
@@ -232,9 +235,9 @@ if (!function_exists('hasError')) {
     }
 }
 
-if (!function_exists('inputFeedbackComponent')) {
+if (! function_exists('inputFeedbackComponent')) {
     /**
-     * Input feedback component
+     * Input feedback component.
      *
      * @param string|array $message
      * @param string $mode valid|invalid
@@ -251,10 +254,10 @@ if (!function_exists('inputFeedbackComponent')) {
         string $glue = '<br>',
         string|null $id = null
     ): Htmlable {
-        if (!in_array($mode, ['valid', 'invalid'])) {
+        if (! in_array($mode, ['valid', 'invalid'])) {
             $mode = 'invalid';
         }
-        if (!in_array($type, ['feedback', 'tooltip'])) {
+        if (! in_array($type, ['feedback', 'tooltip'])) {
             $type = 'feedback';
         }
         if (is_array($message)) {
@@ -265,9 +268,9 @@ if (!function_exists('inputFeedbackComponent')) {
     }
 }
 
-if (!function_exists('feedbackClass')) {
+if (! function_exists('feedbackClass')) {
     /**
-     * Feedback CSS Class
+     * Feedback CSS Class.
      *
      * @param string|array|null $key
      * @param string|null $bag
@@ -285,13 +288,14 @@ if (!function_exists('feedbackClass')) {
         if (hasError($key, $bag)) {
             return $class ?? ($isGroup ? 'has-error' : 'is-invalid');
         }
+
         return '';
     }
 }
 
-if (!function_exists('feedbackInput')) {
+if (! function_exists('feedbackInput')) {
     /**
-     * InValid input feedback
+     * InValid input feedback.
      *
      * @param string|array|null $key
      * @param ?string $bag
@@ -305,7 +309,9 @@ if (!function_exists('feedbackInput')) {
         string $type = 'feedback',
         bool $asString = false
     ): Htmlable|string {
-        if (empty($errors = getErrors($bag))) return '';
+        if (empty($errors = getErrors($bag))) {
+            return '';
+        }
 
         if (is_array($key)) {
             $messages = [];
@@ -322,9 +328,9 @@ if (!function_exists('feedbackInput')) {
     }
 }
 
-if (!function_exists('errorAll')) {
+if (! function_exists('errorAll')) {
     /**
-     * InValid input feedback
+     * InValid input feedback.
      *
      * @param string|null $bag
      * @param array|null $exclude
@@ -333,20 +339,24 @@ if (!function_exists('errorAll')) {
     function errorAll(string|null $bag = null, array|null $exclude = null): string
     {
         $errors = session('errors');
-        if (empty($errors)) return '';
+        if (empty($errors)) {
+            return '';
+        }
         if ($bag) {
-            if (empty($errors->$bag->all())) return '';
+            if (empty($errors->$bag->all())) {
+                return '';
+            }
             // $errors = $errors->$bag;
         }
         // if (!$errors->has($key)) return '';
 
-        return '<div class="alert alert-danger rounded-0" style="border-width: 2px; border-left: none; border-right: none;">' .
-            '<h4 class="alert-heading">Eror!! <small>Periksa Lagi Inputan Anda</small></h4>' .
+        return '<div class="alert alert-danger rounded-0" style="border-width: 2px; border-left: none; border-right: none;">'.
+            '<h4 class="alert-heading">Eror!! <small>Periksa Lagi Inputan Anda</small></h4>'.
             '</div>';
     }
 }
 
-if (!function_exists('viewPath')) {
+if (! function_exists('viewPath')) {
     /**
      * Compile view path.
      *
@@ -361,14 +371,14 @@ if (!function_exists('viewPath')) {
         try {
             $view = view()->shared('viewPath', '');
 
-            return $view . $path;
+            return $view.$path;
         } catch (Exception $e) {
             return $path;
         }
     }
 }
 
-if (!function_exists('paginated')) {
+if (! function_exists('paginated')) {
     /**
      * Check data is paginated.
      *
@@ -391,7 +401,7 @@ if (!function_exists('paginated')) {
     }
 }
 
-if (!function_exists('isPaginated')) {
+if (! function_exists('isPaginated')) {
     /**
      * Check data is paginated.
      *
@@ -402,17 +412,16 @@ if (!function_exists('isPaginated')) {
     function isPaginated(Arrayable $source): bool
     {
         try {
-            return (
+            return
                 $source instanceof Pagination\Paginator ||
-                $source instanceof Pagination\CursorPaginator
-            );
+                $source instanceof Pagination\CursorPaginator;
         } catch (Exception $e) {
             return false;
         }
     }
 }
 
-if (!function_exists('paginatedStyleReset')) {
+if (! function_exists('paginatedStyleReset')) {
     /**
      * Style reset paginate.
      *
@@ -433,7 +442,7 @@ if (!function_exists('paginatedStyleReset')) {
     }
 }
 
-if (!function_exists('paginatedLink')) {
+if (! function_exists('paginatedLink')) {
     /**
      * Generate paginate links.
      *
@@ -445,12 +454,12 @@ if (!function_exists('paginatedLink')) {
      */
     function paginatedLink(
         Arrayable $source,
-        string|null       $view = null,
-        array             $data = [],
-    ): Htmlable
-    {
+        string|null $view = null,
+        array $data = [],
+    ): Htmlable {
         try {
             $source = paginated($source);
+
             return $source->links($view, $data);
         } catch (Exception $e) {
             return str()->toHtmlString();
@@ -458,7 +467,7 @@ if (!function_exists('paginatedLink')) {
     }
 }
 
-if (!function_exists('cachedAsset')) {
+if (! function_exists('cachedAsset')) {
     /**
      * @param string $path
      * @param bool $secure
@@ -471,11 +480,11 @@ if (!function_exists('cachedAsset')) {
             ? $path
             : asset($path, $secure);
         $version = config('cache.version');
-        if (!$version) {
+        if (! $version) {
             $version = cache()->flexible('kfn-cache-version', [60, 70], fn () => uniqid());
         }
 
-        return $asset . '?_v=' . $version;
+        return $asset.'?_v='.$version;
     }
 }
 
@@ -488,7 +497,9 @@ if (! function_exists('includeIf')) {
      */
     function includeIf(string|null $path = null): void
     {
-        if (!$path) return;
+        if (! $path) {
+            return;
+        }
 
         $view = app('view');
         if ($view->exists($path)) {
@@ -515,7 +526,7 @@ if (! function_exists('methodIf')) {
     }
 }
 
-if (!function_exists('hasStack')) {
+if (! function_exists('hasStack')) {
     /**
      * @param  string|null  $name
      *
@@ -523,6 +534,6 @@ if (!function_exists('hasStack')) {
      */
     function hasStack(string|null $name = null): bool
     {
-        return $name && !empty(view()->yieldPushContent($name));
+        return $name && ! empty(view()->yieldPushContent($name));
     }
 }

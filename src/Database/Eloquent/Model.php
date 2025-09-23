@@ -34,6 +34,7 @@ abstract class Model extends BaseModel implements HasModel
     public static function cleanQuery(): BaseBuilder
     {
         $instance = new static;
+
         return $instance->registerGlobalScopes($instance->newModelQuery());
     }
 
@@ -43,6 +44,7 @@ abstract class Model extends BaseModel implements HasModel
     public static function rawQuery(): QueryBuilder
     {
         $instance = new static();
+
         return DB::connection($instance->getConnectionName())->table($instance->getTable());
     }
 }
