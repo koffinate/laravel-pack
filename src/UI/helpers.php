@@ -228,7 +228,7 @@ if (!function_exists('hasError')) {
             return false;
         }
 
-        return $errors->has($key);
+        return $errors->hasAny($key);
     }
 }
 
