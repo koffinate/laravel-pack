@@ -264,7 +264,13 @@ if (! function_exists('inputFeedbackComponent')) {
             $message = implode($glue, $message);
         }
 
-        return str("<div class='{$mode}-{$type}' id='{$id}'>{$message}</div>")->toHtmlString();
+        $template = config('koffinate.ui.feedback.template')
+            ?: '<div class=":feedback-class:" id=":id:">:message:</div>';
+
+        return str($template)->replace(
+            [':feedback-class:', ':id:', ':message:'],
+            [$mode.'-'.$type, $id ?? uniqid('kfn-feedback-'), $message]
+        )->toHtmlString();
     }
 }
 

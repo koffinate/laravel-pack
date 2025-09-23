@@ -24,9 +24,29 @@ return [
         'text' => env('KFN_VIEW_OBSCURE_TEXT', '*****'),
     ],
 
+    /**
+     * The url to be used.
+     */
     'url' => [
         'document' => env('KFN_DOCUMENT_URL', ''),
         'vendor' => env('KFN_VENDOR_URL', ''),
+    ],
+
+    /**
+     * The feedback template to be used.
+     *
+     * fill with null to default template.
+     * or your custom html tag
+     *
+     * with available variables:
+     *  - :feedback-class:  => to render feedback class
+     *  - :id:  => to render tag id
+     *  - :message:  => to render feedback message
+     *
+     * e.g. <div class=":feedback-class:" id=":id:">:message:</div>
+     */
+    'feedback' => [
+        'template' => null,
     ],
 
 ];
