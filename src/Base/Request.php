@@ -17,9 +17,9 @@ class Request extends \Illuminate\Http\Request
     }
 
     /**
-     * @return true|null
+     * @return bool|null
      */
-    private function isReturnJson(): true|null
+    private function isReturnJson(): bool|null
     {
         $forceToJson = config('koffinate.base.force_json', false);
         $forceToJsonPrefixes = collect((array) config('koffinate.base.force_json_prefixes', []));
