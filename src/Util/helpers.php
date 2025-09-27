@@ -33,7 +33,7 @@ if (! function_exists('prettySize')) {
         $sz = 'BKMGTPE';
         $factor = (int) floor((strlen($bytes) - 1) / 3);
 
-        return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)).$sz[$factor];
+        return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)).($sz[$factor] ?? '');
     }
 }
 
@@ -47,7 +47,7 @@ if (! function_exists('trimAll')) {
      *
      * @throws Exception
      */
-    function trimAll(?string $string, string $type = 'smart', string $pattern = '\W+'): string
+    function trimAll(string|null $string, string $type = 'smart', string $pattern = '\W+'): string
     {
         if (! $string || trim($string) == '') {
             return '';
@@ -72,6 +72,56 @@ if (! function_exists('trimAll')) {
         }
 
         return '';
+    }
+}
+
+if (! function_exists('base64_encrypt')) {
+    /**
+     * @param  string|null  $plain
+     * @param  bool  $twice  twice encryption
+     *
+     * @return string
+     */
+    function base64_encrypt(string|null $plain = null, bool $twice = false): string
+    {
+        if (! $plain) {
+            return '';
+        }
+
+        $rand1 = str()->random(10);
+        $rand2 = str()->random(10);
+        $plain = str($plain)
+            ->toBase64()
+            ->replaceMatches('/^(.{5})(.*)(.{5})$/', "$3:rand1:$2:rand2:$1")
+            ->replace([':rand1:', ':rand2:'], [$rand1, $rand2]);
+        if ($twice) {
+            $plain = $plain->toBase64();
+        }
+        return $plain->toString();
+    }
+}
+
+if (! function_exists('base64_decrypt')) {
+    /**
+     * @param  string|null  $cheaper
+     * @param  bool  $twice  twice encryption
+     *
+     * @return string
+     */
+    function base64_decrypt(string|null $cheaper = null, bool $twice = false): string
+    {
+        if (! $cheaper) {
+            return '';
+        }
+
+        $cheaper = str($cheaper);
+        if ($twice) {
+            $cheaper = $cheaper->fromBase64();
+        }
+        return $cheaper
+            ->replaceMatches('/^(.{5})(.{10})(.*)(.{10})(.{5})$/', "$5$3$1")
+            ->fromBase64()
+            ->toString();
     }
 }
 
@@ -174,6 +224,23 @@ if (! function_exists('carbonFormat')) {
             ? $datetime->format($format)
             : $datetime->isoFormat($isoFormat)
         ).$timezoneLabel;
+    }
+}
+
+if (! function_exists('carbonFromFormat')) {
+    /**
+     * @param  string  $date
+     * @param  string  $format
+     *
+     * @return Carbon|null
+     */
+    function carbonFromFormat(string $date, string $format): Carbon|null
+    {
+        try {
+            return Carbon::createFromFormat('Ymd', $date);
+        } catch (Exception $e) {
+            return null;
+        }
     }
 }
 
