@@ -92,11 +92,12 @@ if (! function_exists('base64_encrypt')) {
         $rand2 = str()->random(10);
         $plain = str($plain)
             ->toBase64()
-            ->replaceMatches('/^(.{5})(.*)(.{5})$/', "$3:rand1:$2:rand2:$1")
+            ->replaceMatches('/^(.{5})(.*)(.{5})$/', '$3:rand1:$2:rand2:$1')
             ->replace([':rand1:', ':rand2:'], [$rand1, $rand2]);
         if ($twice) {
             $plain = $plain->toBase64();
         }
+
         return $plain->toString();
     }
 }
@@ -118,8 +119,9 @@ if (! function_exists('base64_decrypt')) {
         if ($twice) {
             $cheaper = $cheaper->fromBase64();
         }
+
         return $cheaper
-            ->replaceMatches('/^(.{5})(.{10})(.*)(.{10})(.{5})$/', "$5$3$1")
+            ->replaceMatches('/^(.{5})(.{10})(.*)(.{10})(.{5})$/', '$5$3$1')
             ->fromBase64()
             ->toString();
     }
