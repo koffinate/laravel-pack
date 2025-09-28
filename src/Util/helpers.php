@@ -234,10 +234,10 @@ if (! function_exists('carbonFromFormat')) {
      *
      * @return Carbon|null
      */
-    function carbonFromFormat(string $date, string $format): Carbon|null
+    function carbonFromFormat(string $date, string $format = 'Y-m-d H:i:s'): Carbon|null
     {
         try {
-            return Carbon::createFromFormat('Ymd', $date);
+            return Carbon::createFromFormat($format, $date);
         } catch (Exception $e) {
             return null;
         }
