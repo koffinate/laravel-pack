@@ -179,13 +179,13 @@ if (! function_exists('isDev')) {
 
 if (! function_exists('activeCss')) {
     /**
-     * @param string $route
-     * @param array $params
-     * @param string $cssClass
+     * @param  string|array  $route
+     * @param  string|array  $params
+     * @param  string  $cssClass
      *
      * @return string
      */
-    function activeCss(string $route = '', array $params = [], string $cssClass = 'active current'): string
+    function activeCss(string|array $route = '', string|array $params = [], string $cssClass = 'active current'): string
     {
         return activeRoute($route, $params) ? $cssClass : '';
     }
@@ -352,9 +352,7 @@ if (! function_exists('errorAll')) {
             if (empty($errors->$bag->all())) {
                 return '';
             }
-            // $errors = $errors->$bag;
         }
-        // if (!$errors->has($key)) return '';
 
         return '<div class="alert alert-danger rounded-0" style="border-width: 2px; border-left: none; border-right: none;">'.
             '<h4 class="alert-heading">Eror!! <small>Periksa Lagi Inputan Anda</small></h4>'.

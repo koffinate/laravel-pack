@@ -131,6 +131,7 @@ if (! function_exists('carbon')) {
     /**
      * @param  string|DateTimeInterface|null  $datetime
      * @param  DateTimeZone|string|null  $timezone
+     * @param  string|DateTimeZone|null  $fromTimezone
      * @param  string|null  $locale
      *
      * @return Carbon
@@ -138,6 +139,7 @@ if (! function_exists('carbon')) {
     function carbon(
         string|DateTimeInterface|null $datetime = null,
         string|DateTimeZone|null $timezone = null,
+        string|DateTimeZone|null $fromTimezone = null,
         string|null $locale = null,
     ): Carbon {
         if (auth()->check()) {
@@ -149,7 +151,8 @@ if (! function_exists('carbon')) {
             }
         }
 
-        $timezone ??= config('app.client_timezone');
+        $fromTimezone ??= config('app.timezone');
+        $timezone ??= config('app.client_timezone') ?: $fromTimezone;
         $locale ??= config('app.client_locale') ?: config('app.locale') ?: config('app.fallback_locale');
 
         try {
@@ -159,8 +162,8 @@ if (! function_exists('carbon')) {
         }
 
         $carbon = $datetime
-            ? Carbon::parse($datetime, config('app.timezone'))
-            : Carbon::now(config('app.timezone'));
+            ? Carbon::parse($datetime, $fromTimezone)
+            : Carbon::now($fromTimezone);
 
         return empty($timezone) ? $carbon : $carbon->timezone($timezone);
     }
@@ -172,6 +175,7 @@ if (! function_exists('carbonFormat')) {
      * @param  string  $isoFormat
      * @param  string|null  $format
      * @param  string|DateTimeZone|null  $timezone
+     * @param  string|DateTimeZone|null  $fromTimezone
      * @param  bool  $showTz
      *
      * @return string
@@ -181,9 +185,11 @@ if (! function_exists('carbonFormat')) {
         string $isoFormat = 'L LT',
         string|null $format = null,
         string|DateTimeZone|null $timezone = null,
+        string|DateTimeZone|null $fromTimezone = null,
         bool|null $showTz = null,
     ): string {
-        $timezone ??= config('app.client_timezone') ?: config('app.timezone');
+        $fromTimezone ??= config('app.timezone');
+        $timezone ??= config('app.client_timezone') ?: $fromTimezone;
         $showTz ??= config('app.client_show_timezone', config('app.show_timezone')) || null;
         $timezoneLabel = '';
         if ($showTz) {
@@ -214,17 +220,15 @@ if (! function_exists('carbonFormat')) {
 
         if (is_string($datetime)) {
             try {
-                $datetime = Carbon::parse($datetime, config('app.timezone'));
+                $datetime = Carbon::parse($datetime, $fromTimezone);
             } catch (Exception $e) {
                 return '';
             }
         }
 
-        $datetime->timezone($timezone);
-
         return ($format
-            ? $datetime->format($format)
-            : $datetime->isoFormat($isoFormat)
+            ? $datetime->timezone($timezone)->format($format)
+            : $datetime->timezone($timezone)->isoFormat($isoFormat)
         ).$timezoneLabel;
     }
 }
@@ -233,13 +237,23 @@ if (! function_exists('carbonFromFormat')) {
     /**
      * @param  string  $date
      * @param  string  $format
+     * @param  string|DateTimeZone|null  $timezone
+     * @param  string|DateTimeZone|null  $fromTimezone
      *
      * @return Carbon|null
      */
-    function carbonFromFormat(string $date, string $format = 'Y-m-d H:i:s'): Carbon|null
+    function carbonFromFormat(
+        string $date,
+        string $format = 'Y-m-d H:i:s',
+        string|DateTimeZone|null $timezone = null,
+        string|DateTimeZone|null $fromTimezone = null,
+    ): Carbon|null
     {
+        $fromTimezone ??= config('app.timezone');
+        $timezone ??= config('app.client_timezone') ?: $fromTimezone;
+
         try {
-            return Carbon::createFromFormat($format, $date);
+            return Carbon::createFromFormat($format, $date, $fromTimezone)->timezone($timezone);
         } catch (Exception $e) {
             return null;
         }
@@ -390,19 +404,25 @@ if (! function_exists('to_routed')) {
 
 if (! function_exists('activeRoute')) {
     /**
-     * @param  string  $route
+     * @param  string|array  $route
      * @param  string|array  $params
      *
      * @return bool
      */
-    function activeRoute(string $route = '', string|array $params = []): bool
+    function activeRoute(string|array $route = [], string|array $params = []): bool
     {
         if (empty($route = trim($route))) {
             return false;
         }
 
         try {
-            if (request()->routeIs($route, "{$route}.*")) {
+            if (is_string($route)) {
+                $route = explode('|', $route);
+            }
+            $routes = collect($route);
+            $routes = $routes->each(fn ($it) => $routes->push($it.'.*'))->toArray();
+
+            if (request()->routeIs($routes)) {
                 if (empty($params)) {
                     return true;
                 }
