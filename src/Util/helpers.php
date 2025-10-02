@@ -247,8 +247,7 @@ if (! function_exists('carbonFromFormat')) {
         string $format = 'Y-m-d H:i:s',
         string|DateTimeZone|null $timezone = null,
         string|DateTimeZone|null $fromTimezone = null,
-    ): Carbon|null
-    {
+    ): Carbon|null {
         $fromTimezone ??= config('app.timezone');
         $timezone ??= config('app.client_timezone') ?: $fromTimezone;
 
