@@ -7,6 +7,7 @@ use Kfn\Base\Contracts\ResponseResultInterface;
 enum ResponseResult implements ResponseResultInterface
 {
     case DEFAULT;
+    case CUSTOM;
     case SIMPLE;
     case SELECT2;
 

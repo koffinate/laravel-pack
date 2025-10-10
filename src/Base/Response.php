@@ -2,6 +2,7 @@
 
 namespace Kfn\Base;
 
+use Closure;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\Pagination\Paginator;
@@ -20,7 +21,11 @@ use Kfn\Base\Enums\ResponseResult;
 
 class Response implements Responsable
 {
-    private static ResponseResult $resultAs = ResponseResult::DEFAULT;
+    /** @var ResponseResultInterface */
+    private static ResponseResultInterface $resultAs = ResponseResult::DEFAULT;
+
+    /** @var Closure|null */
+    private static Closure|null $customResult = null;
 
     /**
      * Response constructor.
@@ -31,16 +36,16 @@ class Response implements Responsable
      * @param array $extra
      */
     public function __construct(
-        protected JsonResource|ResourceCollection|Arrayable|LengthAwarePaginator|CursorPaginator|array|string|null $data = null,
-        protected string|null $message = null,
-        protected ResponseCodeInterface $code = ResponseCode::SUCCESS,
-        protected array $extra = [],
+        public JsonResource|ResourceCollection|Arrayable|LengthAwarePaginator|CursorPaginator|array|string|null $data = null,
+        public string|null $message = null,
+        public ResponseCodeInterface $code = ResponseCode::SUCCESS,
+        public array $extra = [],
     ) {
         //
     }
 
     /**
-     * @inheritDoc
+     * @inheritdoc
      *
      * @throws \JsonException
      */
@@ -72,6 +77,13 @@ class Response implements Responsable
             ),
             default => $this->data,
         };
+
+        if (ResponseResult::CUSTOM == static::$resultAs) {
+            if (static::$customResult instanceof Closure) {
+                return call_user_func(static::$customResult, $this, $payload);
+            }
+            static::$resultAs = ResponseResult::DEFAULT;
+        }
 
         return match (static::$resultAs) {
             ResponseResult::SIMPLE => $this->getResponseSimple($payload),
@@ -201,12 +213,18 @@ class Response implements Responsable
     }
 
     /**
-     * @param ResponseResultInterface $result
+     * @param  ResponseResultInterface|Closure  $result
      *
      * @return void
      */
-    public static function setResultAs(ResponseResultInterface $result): void
+    public static function setResultAs(ResponseResultInterface|Closure $result): void
     {
+        if ($result instanceof Closure) {
+            static::$resultAs = ResponseResult::CUSTOM;
+            self::$customResult = $result;
+            return;
+        }
+
         static::$resultAs = $result;
     }
 }
