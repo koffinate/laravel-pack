@@ -222,6 +222,7 @@ class Response implements Responsable
         if ($result instanceof Closure) {
             static::$resultAs = ResponseResult::CUSTOM;
             self::$customResult = $result;
+
             return;
         }
 
