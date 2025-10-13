@@ -2,4 +2,6 @@
 
 namespace Kfn\Base\Contracts;
 
-interface IKfnException {}
+interface IKfnException
+{
+}
