@@ -2,4 +2,6 @@
 
 namespace Kfn\Base\Contracts;
 
-interface IResponse {}
+interface IResponse
+{
+}
