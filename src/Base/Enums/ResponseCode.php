@@ -2,11 +2,14 @@
 
 namespace Kfn\Base\Enums;
 
-use ArchTech\Enums\{From, InvokableCases, Options, Values};
-use Kfn\Base\Contracts\ResponseCodeInterface;
+use ArchTech\Enums\From;
+use ArchTech\Enums\InvokableCases;
+use ArchTech\Enums\Options;
+use ArchTech\Enums\Values;
+use Kfn\Base\Contracts\IResponseCode;
 use Symfony\Component\HttpFoundation\Response;
 
-enum ResponseCode implements ResponseCodeInterface
+enum ResponseCode implements IResponseCode
 {
     use From;
     use Values;

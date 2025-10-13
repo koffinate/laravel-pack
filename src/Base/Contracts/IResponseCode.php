@@ -2,7 +2,7 @@
 
 namespace Kfn\Base\Contracts;
 
-interface ResponseCodeInterface
+interface IResponseCode
 {
     /**
      * Determine httpCode from response code.
