@@ -29,6 +29,22 @@ abstract class Model extends BaseModel implements HasModel
     }
 
     /**
+     * @return static
+     */
+    public static function self(): static
+    {
+        return new static();
+    }
+
+    /**
+     * @return string
+     */
+    public static function tableName(): string
+    {
+        return static::self()->getTable();
+    }
+
+    /**
      * @return BaseBuilder
      */
     public static function cleanQuery(): BaseBuilder

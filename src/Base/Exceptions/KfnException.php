@@ -2,6 +2,7 @@
 
 namespace Kfn\Base\Exceptions;
 
+use Closure;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -13,31 +14,38 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
-use Kfn\Base\Contracts\ResponseCodeInterface;
+use JsonException;
+use Kfn\Base\Contracts\IKfnException;
+use Kfn\Base\Contracts\IResponse;
+use Kfn\Base\Contracts\IResponseCode;
 use Kfn\Base\Enums\ResponseCode;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
-class KfnException extends \Exception implements Arrayable, Responsable
+class KfnException extends \Exception implements IKfnException, Arrayable, Responsable
 {
+    /** @var string */
     public static string $result;
+
+    /** @var Closure|null */
+    private static Closure|null $customResult = null;
 
     /**
      * Base Exception constructor.
      *
-     * @param  ResponseCodeInterface  $rc
-     * @param ?string  $message
+     * @param  IResponseCode  $rc
+     * @param  string|null  $message
      * @param  array|null  $data
      * @param  array|null  $errors
-     * @param  \Throwable|null  $previous
+     * @param  Throwable|null  $previous
      */
     public function __construct(
-        public ResponseCodeInterface $rc = ResponseCode::ERR_UNKNOWN,
-        ?string $message = null,
+        public IResponseCode $rc = ResponseCode::ERR_UNKNOWN,
+        string|null $message = null,
         protected array|null $data = null,
         protected array|null $errors = null,
-        ?Throwable $previous = null
+        Throwable|null $previous = null
     ) {
         if (is_null($message)) {
             $message = $rc->message();
@@ -48,8 +56,10 @@ class KfnException extends \Exception implements Arrayable, Responsable
     /**
      * {@inheritDoc}
      *
-     * @throws \JsonException
-     * @throws BindingResolutionException
+     * @param $request
+     *
+     * @return JsonResponse|Response
+     * @throws JsonException
      */
     public function toResponse($request)
     {
@@ -59,9 +69,13 @@ class KfnException extends \Exception implements Arrayable, Responsable
                 ->withException($this);
     }
 
-    /** {@inheritDoc} */
+    /** {@inheritdoc} */
     public function toArray(): array
     {
+        if (static::$customResult instanceof Closure) {
+            return call_user_func(static::$customResult, $this);
+        }
+
         $resp = [
             'rc' => $this->getResponseCode(),
             'message' => $this->getResponseMessage(),
@@ -97,7 +111,7 @@ class KfnException extends \Exception implements Arrayable, Responsable
     }
 
     /**
-     * Get response message.
+     * Get a response message.
      *
      * @return string
      */
@@ -118,11 +132,11 @@ class KfnException extends \Exception implements Arrayable, Responsable
      * @param Request $request
      * @param Throwable $e
      *
-     * @return Response|JsonResponse|SymfonyResponse
+     * @return IResponse|JsonResponse|SymfonyResponse
      * @throws BindingResolutionException
-     * @throws \JsonException
+     * @throws JsonException
      */
-    public static function renderException(Request $request, Throwable $e): Response|JsonResponse|SymfonyResponse
+    public static function renderException(Request $request, Throwable $e): IResponse|JsonResponse|SymfonyResponse
     {
         $apiPrefixes = collect((array) config('koffinate.base.api_prefixes', []));
         $apiPrefixes->each(fn ($it) => $apiPrefixes->add($it.'/*'));
@@ -144,11 +158,11 @@ class KfnException extends \Exception implements Arrayable, Responsable
      */
     public static function mapToException(Request $request, Throwable $e): static|Throwable
     {
-        try {
-            $statusCode = $e->getStatusCode();
-        } catch (\Throwable) {
-            $statusCode = 0;
-        }
+        // try {
+        //     $statusCode = $e->getStatusCode();
+        // } catch (\Throwable) {
+        //     $statusCode = 0;
+        // }
 
         // if ($statusCode == ResponseCode::ERR_EXPIRED_TOKEN->httpCode() || $e->getPrevious() instanceof TokenMismatchException) {
         if ($e->getPrevious() instanceof TokenMismatchException) {
@@ -194,5 +208,15 @@ class KfnException extends \Exception implements Arrayable, Responsable
             ],
             previous: $e
         );
+    }
+
+    /**
+     * @param  Closure(static): void  $customResult
+     *
+     * @return void
+     */
+    public static function setCustomResult(Closure $customResult): void
+    {
+        self::$customResult = $customResult;
     }
 }

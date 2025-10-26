@@ -2,11 +2,12 @@
 
 namespace Kfn\Base\Enums;
 
-use Kfn\Base\Contracts\ResponseResultInterface;
+use Kfn\Base\Contracts\IResponseResult;
 
-enum ResponseResult implements ResponseResultInterface
+enum ResponseResult implements IResponseResult
 {
     case DEFAULT;
+    case CUSTOM;
     case SIMPLE;
     case SELECT2;
 

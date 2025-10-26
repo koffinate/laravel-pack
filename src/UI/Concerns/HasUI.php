@@ -12,7 +12,7 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Fluent;
-use Kfn\Base\Contracts\ResponseCodeInterface;
+use Kfn\Base\Contracts\IResponseCode;
 use Kfn\Base\Enums\ResponseCode;
 use Kfn\UI\Enums\RenderType;
 use Kfn\UI\Enums\UIType;
@@ -83,7 +83,7 @@ trait HasUI
     protected function response(
         array|string|JsonResource|ResourceCollection|Arrayable|Paginator|CursorPaginator|null $data = null,
         string|null $message = null,
-        ResponseCodeInterface $rc = ResponseCode::SUCCESS,
+        IResponseCode $rc = ResponseCode::SUCCESS,
     ): Response {
         return new Response($data, $message, $rc);
     }

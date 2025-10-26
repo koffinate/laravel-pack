@@ -14,7 +14,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Fluent;
-use Kfn\Base\Contracts\ResponseCodeInterface;
 use Kfn\Base\Enums\ResponseCode;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
@@ -31,7 +30,7 @@ class Response extends \Kfn\Base\Response implements Responsable
     public function __construct(
         array|string|JsonResource|ResourceCollection|Arrayable|Paginator|CursorPaginator|null $data = null,
         ?string $message = null,
-        ResponseCodeInterface $code = ResponseCode::SUCCESS,
+        ResponseCode $code = ResponseCode::SUCCESS,
         array $extra = []
     ) {
         parent::__construct($data, $message, $code, $extra);

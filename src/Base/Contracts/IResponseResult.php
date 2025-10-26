@@ -2,7 +2,7 @@
 
 namespace Kfn\Base\Contracts;
 
-interface ResponseResultInterface
+interface IResponseResult
 {
     /**
      * Wrap response data.
