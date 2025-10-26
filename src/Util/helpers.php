@@ -181,7 +181,7 @@ if (! function_exists('carbonFormat')) {
      * @return string
      */
     function carbonFormat(
-        string|DateTimeInterface|null $datetime,
+        string|DateTimeInterface|null $datetime = null,
         string $isoFormat = 'L LT',
         string|null $format = null,
         string|DateTimeZone|null $timezone = null,
@@ -215,7 +215,7 @@ if (! function_exists('carbonFormat')) {
         }
 
         if (is_null($datetime)) {
-            return '';
+            $datetime = Carbon::now($fromTimezone);
         }
 
         if (is_string($datetime)) {
