@@ -96,7 +96,7 @@ if (! function_exists('hasSections')) {
 
 if (! function_exists('bladeComponent')) {
     /**
-     * Rendering blade component
+     * Rendering blade component.
      *
      * @param  string|ViewComponent  $component
      * @param  array  $data
