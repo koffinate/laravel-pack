@@ -3,8 +3,11 @@
 use Illuminate\Contracts\Pagination;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\ViewErrorBag;
+use Illuminate\View\Component as ViewComponent;
 use Kfn\UI\ViewAssetManager;
 
 if (! function_exists('disguiseText')) {
@@ -76,6 +79,11 @@ if (! function_exists('setDefaultRequest')) {
 }
 
 if (! function_exists('hasSections')) {
+    /**
+     * @param  string  ...$sections
+     *
+     * @return bool
+     */
     function hasSections(string ...$sections): bool
     {
         $view = app('view');
@@ -83,6 +91,26 @@ if (! function_exists('hasSections')) {
         return (bool) collect($sections)->first(function ($section) use ($view) {
             return ! empty(trim($view->yieldContent($section)));
         });
+    }
+}
+
+if (! function_exists('bladeComponent')) {
+    /**
+     * Rendering blade component
+     *
+     * @param  string|ViewComponent  $component
+     * @param  array  $data
+     * @param  bool  $deleteCachedView
+     *
+     * @return HtmlString
+     */
+    function bladeComponent(string|ViewComponent $component, array $data = [], bool $deleteCachedView = false): HtmlString
+    {
+        return str(
+            $component instanceof ViewComponent
+                ? Blade::renderComponent($component)
+                : Blade::render($component, $data, $deleteCachedView)
+        )->toHtmlString();
     }
 }
 
@@ -139,9 +167,9 @@ if (! function_exists('pluginScript')) {
     /**
      * Get Plugin Script.
      *
-     * @return \Illuminate\Support\HtmlString
+     * @return HtmlString
      */
-    function pluginScript(): \Illuminate\Support\HtmlString
+    function pluginScript(): HtmlString
     {
         return ViewAssetManager::script();
     }
@@ -151,9 +179,9 @@ if (! function_exists('pluginStyle')) {
     /**
      * Get Plugin Style.
      *
-     * @return \Illuminate\Support\HtmlString
+     * @return HtmlString
      */
-    function pluginStyle(): \Illuminate\Support\HtmlString
+    function pluginStyle(): HtmlString
     {
         return ViewAssetManager::style();
     }
@@ -520,13 +548,13 @@ if (! function_exists('methodIf')) {
      * @param  bool  $condition
      * @param  string  $method
      *
-     * @return \Illuminate\Support\HtmlString
+     * @return HtmlString
      */
-    function methodIf(bool $condition, string $method): \Illuminate\Support\HtmlString
+    function methodIf(bool $condition, string $method): HtmlString
     {
         return $condition
             ? method_field($method)
-            : new \Illuminate\Support\HtmlString('');
+            : new HtmlString('');
     }
 }
 
