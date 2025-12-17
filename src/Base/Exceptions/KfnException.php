@@ -63,6 +63,10 @@ class KfnException extends \Exception implements IKfnException, Arrayable, Respo
      */
     public function toResponse($request)
     {
+        if ($request->acceptsHtml()) {
+            abort($this->rc->httpCode(), $this->getResponseMessage());
+        }
+
         return $request->expectsJson()
             ? response()->json($this->toArray(), $this->rc->httpCode())
             : response()->make(json_encode($this->toArray(), JSON_THROW_ON_ERROR))

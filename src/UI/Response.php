@@ -42,7 +42,7 @@ class Response extends \Kfn\Base\Response implements Responsable
     /** @inheritdoc */
     public function toResponse($request): HttpResponse|JsonResponse|SymfonyResponse
     {
-        if ($request->acceptsHtml() || $request->ajax()) {
+        if (! $request->expectsJson()) {
             if (in_array($this->redirect, ['back', 'to', 'intended', 'action', 'route'])) {
                 $this->handleRedirect($request);
             }
