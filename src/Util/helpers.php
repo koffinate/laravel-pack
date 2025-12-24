@@ -191,13 +191,13 @@ if (! function_exists('carbon')) {
         }
 
         $carbon = $datetime;
-        if (!$carbon instanceof DateTimeInterface) {
+        if (! $carbon instanceof DateTimeInterface) {
             $carbon = $datetime
                 ? Carbon::parse($datetime, $fromTimezone)
                 : Carbon::now($fromTimezone);
         }
 
-        if (!$isMutable) {
+        if (! $isMutable) {
             $carbon = $carbon->toImmutable();
         }
 
@@ -250,11 +250,10 @@ if (! function_exists('carbonFormat')) {
             $timezoneLabel = ' '.$timezoneSuffix;
         }
 
-        if (!is_object($datetime)) {
+        if (! is_object($datetime)) {
             if (is_null($datetime)) {
                 $datetime = Carbon::now($fromTimezone);
-            }
-            else {
+            } else {
                 try {
                     $datetime = Carbon::parse($datetime, $fromTimezone);
                 } catch (Exception $e) {
@@ -298,7 +297,7 @@ if (! function_exists('carbonFromFormat')) {
             }
 
             $carbon = $carbon->timezone($timezone);
-            if (!$isMutable) {
+            if (! $isMutable) {
                 $carbon = $carbon->toImmutable();
             }
 

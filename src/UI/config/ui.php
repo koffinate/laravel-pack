@@ -50,7 +50,7 @@ return [
     ],
 
     /**
-     * exception handling
+     * exception handling.
      */
     'exception' => [
         /**
@@ -62,7 +62,7 @@ return [
 
         /**
          * redirect to url.
-         * available values: back, url-string
+         * available values: back, url-string.
          */
         'redirect_to' => 'back',
 
