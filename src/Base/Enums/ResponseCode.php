@@ -57,8 +57,28 @@ enum ResponseCode implements IResponseCode
             self::ERR_FORBIDDEN_ACCESS,
             self::ERR_ACTION_UNAUTHORIZED => Response::HTTP_FORBIDDEN,
 
-            default => Response::HTTP_BAD_REQUEST
+            default => Response::HTTP_BAD_REQUEST,
         };
+    }
+
+    /**
+     * alias of httpCode.
+     *
+     * @return int
+     */
+    public function statusCode(): int
+    {
+        return $this->httpCode();
+    }
+
+    /**
+     * Status text from httpCode.
+     *
+     * @return string
+     */
+    public function statusText(): string
+    {
+        return Response::$statusTexts[$this->httpCode()] ?? 'Unknown Error';
     }
 
     /**

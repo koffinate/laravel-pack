@@ -23,7 +23,7 @@ enum Spacer: int
                 self::WIDE => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
             };
         } catch (Exception $e) {
-            if (app()->hasDebugModeEnabled()) {
+            if (hasDebugModeEnabled()) {
                 throw $e;
             }
         }
@@ -44,7 +44,7 @@ enum Spacer: int
                 self::WIDE => '.. .. .. ..',
             };
         } catch (Exception $e) {
-            if (app()->hasDebugModeEnabled()) {
+            if (hasDebugModeEnabled()) {
                 throw $e;
             }
         }
@@ -65,7 +65,7 @@ enum Spacer: int
                 self::WIDE => '------->',
             };
         } catch (Exception $e) {
-            if (app()->hasDebugModeEnabled()) {
+            if (hasDebugModeEnabled()) {
                 throw $e;
             }
         }

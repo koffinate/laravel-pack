@@ -13,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Session\TokenMismatchException;
+use Illuminate\Support\Uri;
 use Illuminate\Validation\ValidationException;
 use JsonException;
 use Kfn\Base\Contracts\IKfnException;
@@ -63,7 +64,38 @@ class KfnException extends \Exception implements IKfnException, Arrayable, Respo
      */
     public function toResponse($request)
     {
-        if ($request->acceptsHtml()) {
+        if ($request->acceptsHtml() && !static::shouldRenderException()) {
+            if ('redirect' === config('koffinate.ui.exception.handling_method')) {
+                $redirectTo = config('koffinate.ui.exception.redirect_to');
+                $redirectUri = new Uri($redirectTo);
+                $prevUri = new Uri($request->headers->get('referer'));
+
+                $redirect = 'back' === $redirectTo
+                    ? redirect()->back()
+                    : redirect()->to($redirectTo);
+
+                if (
+                    $request->path() === $redirectUri->path() ||
+                    $request->getHttpHost() !== $prevUri->getUri()->getAuthority() ||
+                    $request->path() === $prevUri->path()
+                ) {
+                    $redirect = redirect()->to('/');
+                }
+
+                try {
+                    $redirect->withInput()
+                        ->with('kfn-exception', [
+                            'name' => $this->rc->name,
+                            'statusCode' => $this->rc->httpCode(),
+                            'statusText' => $this->rc->statusText(),
+                            'message' => $this->getResponseMessage(),
+                        ])
+                        ->send();
+                } catch (\Throwable $e) {
+                    // continue to the next handler
+                }
+            }
+
             abort($this->rc->httpCode(), $this->getResponseMessage());
         }
 
@@ -80,9 +112,14 @@ class KfnException extends \Exception implements IKfnException, Arrayable, Respo
             return call_user_func(static::$customResult, $this);
         }
 
+        $message = $this->getResponseMessage();
+        if (!hasDebugModeEnabled() && str($message)->contains(['SQLSTATE', 'No query results'], true)) {
+            $message = 'Query data not found';
+        }
+
         $resp = [
             'rc' => $this->getResponseCode(),
-            'message' => $this->getResponseMessage(),
+            'message' => $message,
             'timestamp' => now(),
             \Kfn\Base\Response::getResultAs()->dataWrapper() => $this->data,
         ];
@@ -91,13 +128,18 @@ class KfnException extends \Exception implements IKfnException, Arrayable, Respo
             $resp['errors'] = $this->errors;
         }
 
-        if (config('app.debug') && $this->getPrevious() instanceof Throwable) {
+        $previousExc = $this->getPrevious();
+        if (hasDebugModeEnabled() && $previousExc instanceof Throwable) {
             $resp['debug'] = [
-                'origin_message' => $this->getPrevious()->getMessage(),
-                'class' => get_class($this->getPrevious()),
-                'file' => $this->getPrevious()->getFile(),
-                'line' => $this->getPrevious()->getLine(),
-                'trace' => $this->getPrevious()->getTrace(),
+                'origin_message' => $previousExc->getMessage(),
+                'class' => get_class($previousExc),
+                'file' => $previousExc->getFile(),
+                'line' => $previousExc->getLine(),
+                'trace' => match (config('koffinate.base.debug.trace_mode')) {
+                    'string' => $previousExc->getTraceAsString(),
+                    'array' => explode(PHP_EOL, $previousExc->getTraceAsString()),
+                    default => $previousExc->getTrace(),
+                },
             ];
         }
 
@@ -121,7 +163,7 @@ class KfnException extends \Exception implements IKfnException, Arrayable, Respo
      */
     public function getResponseMessage(): string
     {
-        if (config('app.debug') && $this->getPrevious() instanceof Throwable) {
+        if (hasDebugModeEnabled() && $this->getPrevious() instanceof Throwable) {
             return $this->getPrevious()->getMessage();
         }
 
@@ -133,72 +175,107 @@ class KfnException extends \Exception implements IKfnException, Arrayable, Respo
     }
 
     /**
-     * @param Request $request
-     * @param Throwable $e
+     * @return bool
+     */
+    public static function shouldRenderException(): bool
+    {
+        $request = request();
+        $apiPrefixes = collect((array) config('koffinate.base.api_prefixes', []));
+        $apiPrefixes->each(fn ($it) => $apiPrefixes->add($it . '/*'));
+
+        return $request->is($apiPrefixes->toArray()) || $request->ajax();
+    }
+
+    /**
+     * @param  Throwable  $throwable
+     * @param  Request  $request
+     * @param  Closure|null  $unrenderable
+     *
+     * @return mixed|void
+     * @throws JsonException
+     * @throws BindingResolutionException
+     */
+    public static function renderable(Throwable $throwable, Request $request, Closure|null $unrenderable = null)
+    {
+        if (static::shouldRenderException()) {
+            if (! $throwable instanceof IKfnException) {
+                $throwable = static::mapToException($request, $throwable);
+            }
+
+            \Kfn\Base\Exceptions\KfnException::renderException($request, $throwable, false);
+        }
+        if ($unrenderable instanceof Closure) {
+            return call_user_func($unrenderable, $throwable, $request);
+        }
+    }
+
+    /**
+     * @param  Request  $request
+     * @param  Throwable  $throwable
+     * @param  bool  $checkThrowable
      *
      * @return IResponse|JsonResponse|SymfonyResponse
-     * @throws BindingResolutionException
      * @throws JsonException
      */
-    public static function renderException(Request $request, Throwable $e): IResponse|JsonResponse|SymfonyResponse
-    {
-        $apiPrefixes = collect((array) config('koffinate.base.api_prefixes', []));
-        $apiPrefixes->each(fn ($it) => $apiPrefixes->add($it.'/*'));
-
-        if ((! $e instanceof static) && ($request->is($apiPrefixes->toArray()) || $request->ajax())) {
-            $e = static::mapToException($request, $e);
+    public static function renderException(
+        Request $request,
+        Throwable $throwable,
+        bool $checkThrowable = true
+    ): IResponse|JsonResponse|SymfonyResponse {
+        if ($checkThrowable && !$throwable instanceof static && static::shouldRenderException()) {
+            $throwable = static::mapToException($request, $throwable);
         }
 
-        return $e->toResponse($request)
+        return $throwable->toResponse($request)
             ->withHeaders(['Accept' => 'application/json'])
             ->send();
     }
 
     /**
      * @param Request $request
-     * @param Throwable $e
+     * @param Throwable $throwable
      *
      * @return Throwable|static
      */
-    public static function mapToException(Request $request, Throwable $e): static|Throwable
+    public static function mapToException(Request $request, Throwable $throwable): static|Throwable
     {
         // try {
-        //     $statusCode = $e->getStatusCode();
+        //     $statusCode = $throwable->getStatusCode();
         // } catch (\Throwable) {
         //     $statusCode = 0;
         // }
 
-        // if ($statusCode == ResponseCode::ERR_EXPIRED_TOKEN->httpCode() || $e->getPrevious() instanceof TokenMismatchException) {
-        if ($e->getPrevious() instanceof TokenMismatchException) {
-            return new static(ResponseCode::ERR_EXPIRED_TOKEN, $e->getMessage(), previous: $e);
+        // if ($statusCode == ResponseCode::ERR_EXPIRED_TOKEN->httpCode() || $throwable->getPrevious() instanceof TokenMismatchException) {
+        if ($throwable->getPrevious() instanceof TokenMismatchException) {
+            return new static(ResponseCode::ERR_EXPIRED_TOKEN, $throwable->getMessage(), previous: $throwable);
         }
 
-        if ($e instanceof ModelNotFoundException) {
-            return new static(ResponseCode::ERR_ENTITY_NOT_FOUND, ResponseCode::ERR_ENTITY_NOT_FOUND->message(), previous: $e);
+        if ($throwable instanceof ModelNotFoundException) {
+            return new static(ResponseCode::ERR_ENTITY_NOT_FOUND, ResponseCode::ERR_ENTITY_NOT_FOUND->message(), previous: $throwable);
         }
 
-        if ($e instanceof ValidationException) {
-            return new static(ResponseCode::ERR_VALIDATION, $e->getMessage(), $e->errors(), previous: $e);
+        if ($throwable instanceof ValidationException) {
+            return new static(ResponseCode::ERR_VALIDATION, $throwable->getMessage(), $throwable->errors(), previous: $throwable);
         }
 
-        if ($e instanceof \Spatie\Permission\Exceptions\RoleAlreadyExists) {
-            return new static(ResponseCode::ERR_VALIDATION, $e->getMessage(), previous: $e);
+        if ($throwable instanceof \Spatie\Permission\Exceptions\RoleAlreadyExists) {
+            return new static(ResponseCode::ERR_VALIDATION, $throwable->getMessage(), previous: $throwable);
         }
 
-        if ($e instanceof AuthenticationException) {
-            return new static(ResponseCode::ERR_AUTHENTICATION, $e->getMessage(), null, previous: $e);
+        if ($throwable instanceof AuthenticationException) {
+            return new static(ResponseCode::ERR_AUTHENTICATION, $throwable->getMessage(), null, previous: $throwable);
         }
 
-        if ($e instanceof NotFoundHttpException) {
-            return new static(ResponseCode::ERR_ROUTE_NOT_FOUND, $e->getMessage(), null, previous: $e);
+        if ($throwable instanceof NotFoundHttpException) {
+            return new static(ResponseCode::ERR_ROUTE_NOT_FOUND, $throwable->getMessage(), null, previous: $throwable);
         }
 
-        if ($e instanceof AuthorizationException || $e instanceof \Spatie\Permission\Exceptions\UnauthorizedException) {
-            return new static(ResponseCode::ERR_ACTION_UNAUTHORIZED, $e->getMessage(), null, previous: $e);
+        if ($throwable instanceof AuthorizationException || $throwable instanceof \Spatie\Permission\Exceptions\UnauthorizedException) {
+            return new static(ResponseCode::ERR_ACTION_UNAUTHORIZED, $throwable->getMessage(), null, previous: $throwable);
         }
 
-        // if ($e instanceof DumpAPIException){
-        //     return $e;
+        // if ($throwable instanceof DumpAPIException){
+        //     return $throwable;
         // }
 
         return new static(
@@ -210,7 +287,7 @@ class KfnException extends \Exception implements IKfnException, Arrayable, Respo
                 'origin' => $request->ip(),
                 'method' => $request->getMethod(),
             ],
-            previous: $e
+            previous: $throwable
         );
     }
 

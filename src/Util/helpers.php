@@ -1,9 +1,24 @@
 <?php
 
+use Carbon\CarbonInterface;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Database;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Fluent;
 use Illuminate\Support\Str;
+
+if (! function_exists('user')) {
+    /**
+     * @param string|null $guard
+     * @return Authenticatable|null
+     */
+    function user(string|null $guard = null): Authenticatable|null
+    {
+        return auth($guard)->check()
+            ? auth($guard)->user()
+            : null;
+    }
+}
 
 if (! function_exists('f')) {
     /**
@@ -127,21 +142,35 @@ if (! function_exists('base64_decrypt')) {
     }
 }
 
+if (! function_exists('hasDebugModeEnabled')) {
+    /**
+     * Determine if the application is running with debug mode enabled.
+     *
+     * @return bool
+     */
+    function hasDebugModeEnabled(): bool
+    {
+        return (bool) config('app.debug');
+    }
+}
+
 if (! function_exists('carbon')) {
     /**
-     * @param  string|DateTimeInterface|null  $datetime
+     * @param  string|CarbonInterface|DateTimeInterface|null  $datetime
      * @param  DateTimeZone|string|null  $timezone
      * @param  string|DateTimeZone|null  $fromTimezone
      * @param  string|null  $locale
+     * @param  bool  $isMutable
      *
-     * @return Carbon
+     * @return CarbonInterface
      */
     function carbon(
-        string|DateTimeInterface|null $datetime = null,
+        string|CarbonInterface|DateTimeInterface|null $datetime = null,
         string|DateTimeZone|null $timezone = null,
         string|DateTimeZone|null $fromTimezone = null,
         string|null $locale = null,
-    ): Carbon {
+        bool $isMutable = false,
+    ): CarbonInterface {
         if (auth()->check()) {
             if (! $timezone) {
                 $timezone = auth()->user()?->timezone ?? null;
@@ -161,17 +190,24 @@ if (! function_exists('carbon')) {
             //
         }
 
-        $carbon = $datetime
-            ? Carbon::parse($datetime, $fromTimezone)
-            : Carbon::now($fromTimezone);
+        $carbon = $datetime;
+        if (!$carbon instanceof DateTimeInterface) {
+            $carbon = $datetime
+                ? Carbon::parse($datetime, $fromTimezone)
+                : Carbon::now($fromTimezone);
+        }
 
-        return empty($timezone) ? $carbon : $carbon->timezone($timezone);
+        if (!$isMutable) {
+            $carbon = $carbon->toImmutable();
+        }
+
+        return $carbon->timezone($timezone);
     }
 }
 
 if (! function_exists('carbonFormat')) {
     /**
-     * @param  string|DateTimeInterface|null  $datetime
+     * @param  string|CarbonInterface|DateTimeInterface|null  $datetime
      * @param  string  $isoFormat
      * @param  string|null  $format
      * @param  string|DateTimeZone|null  $timezone
@@ -181,7 +217,7 @@ if (! function_exists('carbonFormat')) {
      * @return string
      */
     function carbonFormat(
-        string|DateTimeInterface|null $datetime = null,
+        string|CarbonInterface|DateTimeInterface|null $datetime = null,
         string $isoFormat = 'L LT',
         string|null $format = null,
         string|DateTimeZone|null $timezone = null,
@@ -214,15 +250,16 @@ if (! function_exists('carbonFormat')) {
             $timezoneLabel = ' '.$timezoneSuffix;
         }
 
-        if (is_null($datetime)) {
-            $datetime = Carbon::now($fromTimezone);
-        }
-
-        if (is_string($datetime)) {
-            try {
-                $datetime = Carbon::parse($datetime, $fromTimezone);
-            } catch (Exception $e) {
-                return '';
+        if (!is_object($datetime)) {
+            if (is_null($datetime)) {
+                $datetime = Carbon::now($fromTimezone);
+            }
+            else {
+                try {
+                    $datetime = Carbon::parse($datetime, $fromTimezone);
+                } catch (Exception $e) {
+                    return '';
+                }
             }
         }
 
@@ -239,20 +276,33 @@ if (! function_exists('carbonFromFormat')) {
      * @param  string  $format
      * @param  string|DateTimeZone|null  $timezone
      * @param  string|DateTimeZone|null  $fromTimezone
+     * @param  bool  $isMutable
      *
-     * @return Carbon|null
+     * @return CarbonInterface|null
      */
     function carbonFromFormat(
         string $date,
         string $format = 'Y-m-d H:i:s',
         string|DateTimeZone|null $timezone = null,
         string|DateTimeZone|null $fromTimezone = null,
-    ): Carbon|null {
+        bool $isMutable = false,
+    ): CarbonInterface|null {
         $fromTimezone ??= config('app.timezone');
         $timezone ??= config('app.client_timezone') ?: $fromTimezone;
 
         try {
-            return Carbon::createFromFormat($format, $date, $fromTimezone)->timezone($timezone);
+            $carbon = Carbon::createFromFormat($format, $date, $fromTimezone);
+
+            if ($carbon->format($format) !== $date) {
+                return null;
+            }
+
+            $carbon = $carbon->timezone($timezone);
+            if (!$isMutable) {
+                $carbon = $carbon->toImmutable();
+            }
+
+            return $carbon;
         } catch (Exception $e) {
             return null;
         }
@@ -318,7 +368,7 @@ if (! function_exists('toFluent')) {
             try {
                 $data = new Fluent($data ?? []);
             } catch (Exception $e) {
-                if (app()->hasDebugModeEnabled()) {
+                if (hasDebugModeEnabled()) {
                     throw $e;
                 }
                 $data = new Fluent();
@@ -338,7 +388,7 @@ if (! function_exists('throwOnDebug')) {
      */
     function throwOnDebug(Throwable $throw): void
     {
-        if (app()->hasDebugModeEnabled()) {
+        if (hasDebugModeEnabled()) {
             throw $throw;
         }
     }

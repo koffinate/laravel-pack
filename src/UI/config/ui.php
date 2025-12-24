@@ -49,4 +49,28 @@ return [
         'template' => null,
     ],
 
+    /**
+     * exception handling
+     */
+    'exception' => [
+        /**
+         * handling method if exception occurs.
+         * available values: redirect, abort
+         * default method is "abort".
+         */
+        'handling_method' => 'abort',
+
+        /**
+         * redirect to url.
+         * available values: back, url-string
+         */
+        'redirect_to' => 'back',
+
+        /**
+         * fallback url
+         * will be used when exception occurs and fail on redirected back to the previous url.
+         */
+        'fallback_url' => '/',
+    ],
+
 ];

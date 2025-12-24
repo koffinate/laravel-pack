@@ -28,14 +28,19 @@ class UiServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->publishes([__DIR__.'/config/ui.php' => config_path('koffinate/ui.php')], 'koffinate_config');
-        $this->publishes([__DIR__.'/config/plugins.php' => config_path('koffinate/plugins.php')], 'koffinate_config');
+        $this->publishes([__DIR__.'/config/ui.php' => config_path('koffinate/ui.php')], 'koffinate-ui-config');
+        $this->publishes([__DIR__.'/config/plugins.php' => config_path('koffinate/plugins.php')], 'koffinate-ui-config');
+        $this->publishes([__DIR__.'/views/components' => resource_path('views/vendor/koffinate/ui/components')], 'koffinate-ui-resource');
 
         $this->blades();
     }
 
     private function blades(): void
     {
+        $customComponentDir = resource_path('views/vendor/koffinate/ui/components');
+        Blade::anonymousComponentPath($customComponentDir, 'kfn');
+        Blade::anonymousComponentPath(__DIR__.'/views/components', 'kfn');
+
         Blade::if('hasSections', function (string ...$sections): bool {
             $view = app('view');
 

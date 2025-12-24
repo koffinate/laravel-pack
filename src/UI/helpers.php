@@ -5,6 +5,7 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Fluent;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\ViewErrorBag;
 use Illuminate\View\Component as ViewComponent;
@@ -31,7 +32,7 @@ if (! function_exists('disguiseText')) {
                     /** @lang text */
                     '/^(\+?\w{3})(\N+)(\w{2})$/',
                     '$1'.$disguise.'$3',
-                    $disguiseText
+                    $disguiseText,
                 );
             }
         }
@@ -72,9 +73,21 @@ if (! function_exists('setDefaultRequest')) {
                 session()->flashInput($data);
                 $force ? $request->merge($data) : $request->mergeIfMissing($data);
             } catch (Exception $e) {
-                throw_if(app()->hasDebugModeEnabled(), $e);
+                throw_if(hasDebugModeEnabled(), $e);
             }
         }
+    }
+}
+
+if (! function_exists('kfnException')) {
+    /**
+     * @return Fluent
+     */
+    function kfnException(): Fluent
+    {
+        return new Fluent(
+            session('kfn-exception') ?? []
+        );
     }
 }
 
@@ -109,7 +122,7 @@ if (! function_exists('bladeComponent')) {
         return str(
             $component instanceof ViewComponent
                 ? Blade::renderComponent($component)
-                : Blade::render($component, $data, $deleteCachedView)
+                : Blade::render($component, $data, $deleteCachedView),
         )->toHtmlString();
     }
 }
@@ -280,7 +293,7 @@ if (! function_exists('inputFeedbackComponent')) {
         string $mode = 'invalid',
         string $type = 'feedback',
         string $glue = '<br>',
-        string|null $id = null
+        string|null $id = null,
     ): Htmlable {
         if (! in_array($mode, ['valid', 'invalid'])) {
             $mode = 'invalid';
@@ -297,7 +310,7 @@ if (! function_exists('inputFeedbackComponent')) {
 
         return str($template)->replace(
             [':feedback-class:', ':id:', ':message:'],
-            [$mode.'-'.$type, $id ?? uniqid('kfn-feedback-'), $message]
+            [$mode.'-'.$type, $id ?? uniqid('kfn-feedback-'), $message],
         )->toHtmlString();
     }
 }
@@ -317,7 +330,7 @@ if (! function_exists('feedbackClass')) {
         string|array|null $key = null,
         string|null $bag = null,
         bool $isGroup = false,
-        string|null $class = null
+        string|null $class = null,
     ): string {
         if (hasError($key, $bag)) {
             return $class ?? ($isGroup ? 'has-error' : 'is-invalid');
@@ -341,7 +354,7 @@ if (! function_exists('feedbackInput')) {
         string|array|null $key = null,
         string|null $bag = null,
         string $type = 'feedback',
-        bool $asString = false
+        bool $asString = false,
     ): Htmlable|string {
         if (empty($errors = getErrors($bag))) {
             return '';
@@ -537,7 +550,7 @@ if (! function_exists('includeIf')) {
         if ($view->exists($path)) {
             echo $view->make(
                 $path,
-                \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path'])
+                \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']),
             )->render();
         }
     }

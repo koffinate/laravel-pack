@@ -336,7 +336,7 @@ trait HasUI
     {
         if (! $table instanceof DataTableButtons) {
             throw_if(
-                app()->hasDebugModeEnabled(),
+                hasDebugModeEnabled(),
                 new Exception('Table must be instance of Yajra\DataTables\Contracts\DataTableButtons')
             );
 

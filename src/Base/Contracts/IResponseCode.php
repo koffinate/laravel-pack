@@ -12,6 +12,20 @@ interface IResponseCode
     public function httpCode(): int;
 
     /**
+     * alias of httpCode.
+     *
+     * @return int
+     */
+    public function statusCode(): int;
+
+    /**
+     * Status text from httpCode.
+     *
+     * @return string
+     */
+    public function statusText(): string;
+
+    /**
      * Set error to readable message string.
      *
      * @return string
