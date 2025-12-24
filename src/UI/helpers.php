@@ -5,7 +5,6 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Fluent;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\ViewErrorBag;
 use Illuminate\View\Component as ViewComponent;
