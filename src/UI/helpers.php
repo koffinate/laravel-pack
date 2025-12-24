@@ -97,7 +97,7 @@ if (! function_exists('hasSection')) {
      *
      * @return bool
      */
-    function hasSections(string $section): bool
+    function hasSection(string $section): bool
     {
         $view = app('view');
 
