@@ -6,6 +6,7 @@ use ArchTech\Enums\From;
 use ArchTech\Enums\InvokableCases;
 use ArchTech\Enums\Options;
 use ArchTech\Enums\Values;
+use Kfn\Base\Concerns\TResponseCode;
 use Kfn\Base\Contracts\IResponseCode;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -15,6 +16,7 @@ enum ResponseCode implements IResponseCode
     use Values;
     use Options;
     use InvokableCases;
+    use TResponseCode;
 
     case SUCCESS;
     case CREATED;
@@ -59,35 +61,5 @@ enum ResponseCode implements IResponseCode
 
             default => Response::HTTP_BAD_REQUEST,
         };
-    }
-
-    /**
-     * alias of httpCode.
-     *
-     * @return int
-     */
-    public function statusCode(): int
-    {
-        return $this->httpCode();
-    }
-
-    /**
-     * Status text from httpCode.
-     *
-     * @return string
-     */
-    public function statusText(): string
-    {
-        return Response::$statusTexts[$this->httpCode()] ?? 'Unknown Error';
-    }
-
-    /**
-     * Set error to readable message string.
-     *
-     * @return string
-     */
-    public function message(): string
-    {
-        return ucwords(strtolower(str_replace(['ERR_', '_'], ['', ' '], $this->name)));
     }
 }
