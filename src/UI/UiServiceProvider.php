@@ -28,6 +28,8 @@ class UiServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        app(KfnUiException::class);
+
         $this->publishes([__DIR__.'/config/ui.php' => config_path('koffinate/ui.php')], 'koffinate-ui-config');
         $this->publishes([__DIR__.'/config/plugins.php' => config_path('koffinate/plugins.php')], 'koffinate-ui-config');
         $this->publishes([__DIR__.'/views/components' => resource_path('views/vendor/koffinate/ui/components')], 'koffinate-ui-resource');

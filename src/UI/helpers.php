@@ -9,6 +9,7 @@ use Illuminate\Support\Fluent;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\ViewErrorBag;
 use Illuminate\View\Component as ViewComponent;
+use Kfn\UI\KfnUiException;
 use Kfn\UI\ViewAssetManager;
 
 if (! function_exists('disguiseText')) {
@@ -81,13 +82,11 @@ if (! function_exists('setDefaultRequest')) {
 
 if (! function_exists('kfnException')) {
     /**
-     * @return Fluent
+     * @return KfnUiException
      */
-    function kfnException(): Fluent
+    function kfnException(): KfnUiException
     {
-        return new Fluent(
-            session('kfn-exception') ?? []
-        );
+        return app(KfnUiException::class);
     }
 }
 
