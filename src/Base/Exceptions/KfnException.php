@@ -64,7 +64,7 @@ class KfnException extends \Exception implements IKfnException, Arrayable, Respo
      */
     public function toResponse($request)
     {
-        if ($request->acceptsHtml() && !static::shouldRenderException()) {
+        if ($request->acceptsHtml() && ! static::shouldRenderException()) {
             if ('redirect' === config('koffinate.ui.exception.handling_method')) {
                 $redirectTo = config('koffinate.ui.exception.redirect_to');
                 $redirectUri = new Uri($redirectTo);
@@ -113,7 +113,7 @@ class KfnException extends \Exception implements IKfnException, Arrayable, Respo
         }
 
         $message = $this->getResponseMessage();
-        if (!hasDebugModeEnabled() && str($message)->contains(['SQLSTATE', 'No query results'], true)) {
+        if (! hasDebugModeEnabled() && str($message)->contains(['SQLSTATE', 'No query results'], true)) {
             $message = 'Query data not found';
         }
 
@@ -181,7 +181,7 @@ class KfnException extends \Exception implements IKfnException, Arrayable, Respo
     {
         $request = request();
         $apiPrefixes = collect((array) config('koffinate.base.api_prefixes', []));
-        $apiPrefixes->each(fn ($it) => $apiPrefixes->add($it . '/*'));
+        $apiPrefixes->each(fn ($it) => $apiPrefixes->add($it.'/*'));
 
         return $request->is($apiPrefixes->toArray()) || $request->ajax();
     }
@@ -222,7 +222,7 @@ class KfnException extends \Exception implements IKfnException, Arrayable, Respo
         Throwable $throwable,
         bool $checkThrowable = true
     ): IResponse|JsonResponse|SymfonyResponse {
-        if ($checkThrowable && !$throwable instanceof static && static::shouldRenderException()) {
+        if ($checkThrowable && ! $throwable instanceof static && static::shouldRenderException()) {
             $throwable = static::mapToException($request, $throwable);
         }
 

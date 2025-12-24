@@ -25,7 +25,7 @@ class BaseServiceProvider extends ServiceProvider
             } catch (\Throwable $th) {
                 $dumpServerStarted = false;
             }
-            if (!$dumpServerStarted) {
+            if (! $dumpServerStarted) {
                 VarDumper::setHandler(function ($var, ?string $label = null) {
                     if (null !== $label) {
                         $var = array_merge(['label' => $label], $var);

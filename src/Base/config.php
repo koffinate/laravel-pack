@@ -8,18 +8,18 @@ return [
     'api_prefixes' => ['api'],
 
     /**
-     * Debugging handler
+     * Debugging handler.
      */
     'debug' => [
         /**
          * How to trace exception will be rendered.
-         * available values: debug, string, array
+         * available values: debug, string, array.
          */
         'trace_mode' => (string) env('KFN_TRACE_MODE', 'debug'),
     ],
 
     /**
-     * Configure the result wrapper
+     * Configure the result wrapper.
      */
     'result' => [
         'rc_wrapper' => 'rc',
