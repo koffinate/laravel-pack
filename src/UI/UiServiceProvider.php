@@ -45,6 +45,7 @@ class UiServiceProvider extends ServiceProvider
             if (is_string($sections)) {
                 $sections = array_map(fn ($it) => trim($it), explode(',', $sections));
             }
+
             return hasSections($sections);
         });
 
@@ -52,6 +53,7 @@ class UiServiceProvider extends ServiceProvider
             if (is_string($stackName)) {
                 $stackName = array_map(fn ($it) => trim($it), explode(',', $sections));
             }
+
             return hasStack($stackName);
         });
 
