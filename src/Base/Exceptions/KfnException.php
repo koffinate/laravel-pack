@@ -72,8 +72,7 @@ class KfnException extends \Exception implements IKfnException, Arrayable, Respo
                 if ('back' === $redirectTo) {
                     $redirect = redirect()->back();
                     $prevPath = $prevUri->path();
-                }
-                else {
+                } else {
                     $redirect = redirect()->to($redirectTo);
                     $redirectUri = new Uri($redirectTo ?? '');
                     $prevPath = $redirectUri->path();
