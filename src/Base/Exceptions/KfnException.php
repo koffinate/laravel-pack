@@ -84,7 +84,6 @@ class KfnException extends \Exception implements IKfnException, Arrayable, Respo
                 ) {
                     $redirect = redirect()->to('/');
                 }
-                // session()->flash('kfn-exception', $this->toArray());
 
                 try {
                     $exceptionData = [
