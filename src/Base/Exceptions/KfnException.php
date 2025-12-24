@@ -67,8 +67,8 @@ class KfnException extends \Exception implements IKfnException, Arrayable, Respo
         if ($request->acceptsHtml() && ! static::shouldRenderException()) {
             if ('redirect' === config('koffinate.ui.exception.handling_method')) {
                 $redirectTo = config('koffinate.ui.exception.redirect_to');
-                $redirectUri = new Uri($redirectTo);
-                $prevUri = new Uri($request->headers->get('referer'));
+                $redirectUri = new Uri($redirectTo ?? '');
+                $prevUri = new Uri($request->headers->get('referer') ?? '');
 
                 $redirect = 'back' === $redirectTo
                     ? redirect()->back()
