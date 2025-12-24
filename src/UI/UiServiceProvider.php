@@ -41,15 +41,17 @@ class UiServiceProvider extends ServiceProvider
         Blade::anonymousComponentPath($customComponentDir, 'kfn');
         Blade::anonymousComponentPath(__DIR__.'/views/components', 'kfn');
 
-        Blade::if('hasSections', function (string ...$sections): bool {
-            $view = app('view');
-
-            return (bool) collect($sections)->first(function ($section) use ($view) {
-                return ! empty(trim($view->yieldContent($section)));
-            });
+        Blade::if('hasSections', function (string|array $sections): bool {
+            if (is_string($sections)) {
+                $sections = array_map(fn ($it) => trim($it), explode(',', $sections));
+            }
+            return hasSections($sections);
         });
 
         Blade::if('hasStack', function ($stackName) {
+            if (is_string($stackName)) {
+                $stackName = array_map(fn ($it) => trim($it), explode(',', $sections));
+            }
             return hasStack($stackName);
         });
 

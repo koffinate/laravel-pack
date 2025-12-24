@@ -91,6 +91,20 @@ if (! function_exists('kfnException')) {
     }
 }
 
+if (! function_exists('hasSection')) {
+    /**
+     * @param  string  $section
+     *
+     * @return bool
+     */
+    function hasSections(string $section): bool
+    {
+        $view = app('view');
+
+        return ! empty(trim($view->yieldContent($section)));
+    }
+}
+
 if (! function_exists('hasSections')) {
     /**
      * @param  string  ...$sections
@@ -573,12 +587,24 @@ if (! function_exists('methodIf')) {
 
 if (! function_exists('hasStack')) {
     /**
-     * @param  string|null  $name
+     * @param  string|array|null  $name
      *
      * @return bool
      */
-    function hasStack(string|null $name = null): bool
+    function hasStack(string|array|null $name = null): bool
     {
-        return $name && ! empty(view()->yieldPushContent($name));
+        if (! $name) {
+            return false;
+        }
+
+        $view = app('view');
+
+        if (is_string($name)) {
+            return ! empty($view->yieldPushContent($name));
+        }
+
+        return (bool) collect($name)->first(function ($stackName) use ($view) {
+            return ! empty(trim($view->yieldPushContent($stackName)));
+        });
     }
 }
