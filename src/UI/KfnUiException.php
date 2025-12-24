@@ -22,7 +22,7 @@ class KfnUiException implements IKfnUiException
             if (self::$responseCode instanceof IResponseCode) {
                 self::$name = self::$responseCode->name;
                 self::$message = $exceptionData->get('message') ?? self::$responseCode->message();
-                self::$code = (int)($exceptionData->get('statusCode') ?? self::$responseCode->statusCode());
+                self::$code = (int) ($exceptionData->get('statusCode') ?? self::$responseCode->statusCode());
                 self::$statusText = $exceptionData->get('statusText') ?? self::$responseCode->statusText();
             }
         } catch (\Throwable $throw) {

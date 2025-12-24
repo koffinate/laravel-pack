@@ -2,4 +2,6 @@
 
 namespace Kfn\UI\Contracts;
 
-interface IKfnUiException {}
+interface IKfnUiException
+{
+}
