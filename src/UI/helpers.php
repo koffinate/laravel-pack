@@ -85,7 +85,8 @@ if (! function_exists('kfnException')) {
      */
     function kfnException(): KfnUiException
     {
-        return app(KfnUiException::class);
+        // return new KfnUiException();
+        return app('kfnExceptionMessage');
     }
 }
 

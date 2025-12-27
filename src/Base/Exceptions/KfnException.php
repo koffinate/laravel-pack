@@ -86,17 +86,15 @@ class KfnException extends \Exception implements IKfnException, Arrayable, Respo
                 }
 
                 try {
-                    $exceptionData = [
+                    $excData = [
                         'rc' => $this->rc::class,
                         'name' => $this->rc->name,
-                        'statusCode' => $this->rc->httpCode(),
-                        'statusText' => $this->rc->statusText(),
                         'message' => $this->getResponseMessage(),
                     ];
+                    $isSecure = $request->isSecure() || (bool) config('app.secure');
+                    setcookie('kfn-exc', encrypt($excData), time() + 300, '/', '', $isSecure, true);
 
-                    $redirect->withInput()
-                        ->with('kfn-exception', $exceptionData)
-                        ->send();
+                    $redirect->withInput()->send();
                 } catch (\Throwable $e) {
                     // continue to the next handler
                 }

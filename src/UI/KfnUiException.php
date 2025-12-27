@@ -2,39 +2,32 @@
 
 namespace Kfn\UI;
 
-use Illuminate\Support\Fluent;
 use Kfn\Base\Contracts\IResponseCode;
 use Kfn\UI\Contracts\IKfnUiException;
 
 class KfnUiException implements IKfnUiException
 {
-    private static IResponseCode|null $responseCode = null;
-    private static string|null $name = null;
-    private static string|null $message = null;
-    private static int|null $code = null;
-    private static string|null $statusText = null;
+    public static IResponseCode|null $responseCode = null;
+    public static string|null $name = null;
+    public static string|null $message = null;
+    public static int|null $code = null;
+    public static string|null $statusText = null;
 
-    public function __construct(array|null $data = null)
-    {
-        $exceptionData = new Fluent($data ?? ((array) session('kfn-exception') ?? []));
-        try {
-            self::$responseCode = $exceptionData->get('rc')::tryFrom($exceptionData->get('name') ?? null);
-            if (self::$responseCode instanceof IResponseCode) {
-                self::$name = self::$responseCode->name;
-                self::$message = $exceptionData->get('message') ?? self::$responseCode->message();
-                self::$code = (int) ($exceptionData->get('statusCode') ?? self::$responseCode->statusCode());
-                self::$statusText = $exceptionData->get('statusText') ?? self::$responseCode->statusText();
-            }
-        } catch (\Throwable $throw) {
-            self::$responseCode = null;
-            self::$name = null;
-        }
-    }
-
-    public static function of(array $data): static
-    {
-        return new static($data);
-    }
+    // public function __construct(
+    //     IResponseCode|null $responseCode = null,
+    //     string|null $name = null,
+    //     string|null $message = null,
+    //     int|null $code = null,
+    //     string|null $statusText = null,
+    // ) {
+    //     if (is_null(self::$name)) {
+    //         self::$responseCode = $responseCode;
+    //         self::$name = $name ?? 'already-loaded';
+    //         self::$message = $message;
+    //         self::$code = $code;
+    //         self::$statusText = $statusText;
+    //     }
+    // }
 
     public function exist(): bool
     {
@@ -70,6 +63,7 @@ class KfnUiException implements IKfnUiException
     public function toArray(): array
     {
         return [
+            'sess-id' => session()->id(),
             'source' => self::$responseCode ? self::$responseCode::class : 'unknown',
             'name' => self::$name,
             'status-code' => self::$code,

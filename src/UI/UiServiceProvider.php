@@ -3,10 +3,15 @@
 namespace Kfn\UI;
 
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Fluent;
 use Illuminate\Support\ServiceProvider;
+use Kfn\Base\Contracts\IResponseCode;
+use Kfn\UI\Contracts\IKfnUiException;
 
 class UiServiceProvider extends ServiceProvider
 {
+    public static IKfnUiException|null $kfnException = null;
+
     /**
      * Register services.
      *
@@ -19,6 +24,29 @@ class UiServiceProvider extends ServiceProvider
 
         // $this->app->register(DbServiceProvider::class, true);
         // $this->app->register(BladeServiceProvider::class, true);
+
+        $this->app->singleton('kfnExceptionMessage', function (): IKfnUiException {
+            if (is_null(KfnUiException::$name) && isset($_COOKIE['kfn-exc'])) {
+                try {
+                    $excCookie = decrypt($_COOKIE['kfn-exc']) ?? [];
+                    $excData = new Fluent($excCookie);
+                    $rcName = $excData->get('name');
+                    $rc = $excData->get('rc')::tryFrom($rcName ?? '') ?? null;
+                    if ($rc instanceof IResponseCode) {
+                        setcookie('kfn-exc', '', 1);
+
+                        KfnUiException::$responseCode = $rc;
+                        KfnUiException::$name = $rcName;
+                        KfnUiException::$message = $excData->get('message') ?? $rc->message();
+                        KfnUiException::$code = $rc->statusCode();
+                        KfnUiException::$statusText = $rc->statusText();
+                    }
+                } catch (\Throwable $throw) {
+                    //
+                }
+            }
+            return new KfnUiException();
+        });
     }
 
     /**
@@ -28,8 +56,6 @@ class UiServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        app(KfnUiException::class);
-
         $this->publishes([__DIR__.'/config/ui.php' => config_path('koffinate/ui.php')], 'koffinate-ui-config');
         $this->publishes([__DIR__.'/config/plugins.php' => config_path('koffinate/plugins.php')], 'koffinate-ui-config');
         $this->publishes([__DIR__.'/views/components' => resource_path('views/vendor/koffinate/ui/components')], 'koffinate-ui-resource');
