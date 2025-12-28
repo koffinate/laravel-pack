@@ -45,7 +45,7 @@ class UiServiceProvider extends ServiceProvider
                     //
                 }
             }
-            
+
             return new KfnUiException();
         });
     }
