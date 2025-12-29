@@ -3,9 +3,7 @@
 namespace Kfn\UI;
 
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Fluent;
 use Illuminate\Support\ServiceProvider;
-use Kfn\Base\Contracts\IResponseCode;
 use Kfn\UI\Contracts\IKfnUiException;
 
 class UiServiceProvider extends ServiceProvider
@@ -26,26 +24,8 @@ class UiServiceProvider extends ServiceProvider
         // $this->app->register(BladeServiceProvider::class, true);
 
         $this->app->singleton('kfnExceptionMessage', function (): IKfnUiException {
-            if (is_null(KfnUiException::$name) && isset($_COOKIE['kfn-exc'])) {
-                try {
-                    $excCookie = decrypt($_COOKIE['kfn-exc']) ?? [];
-                    $excData = new Fluent($excCookie);
-                    $rcName = $excData->get('name');
-                    $rc = $excData->get('rc')::tryFrom($rcName ?? '') ?? null;
-                    if ($rc instanceof IResponseCode) {
-                        setcookie('kfn-exc', '', 1);
+            KfnUiException::set();
 
-                        KfnUiException::$responseCode = $rc;
-                        KfnUiException::$name = $rcName;
-                        KfnUiException::$message = $excData->get('message') ?? $rc->message();
-                        KfnUiException::$code = $rc->statusCode();
-                        KfnUiException::$statusText = $rc->statusText();
-                    }
-                } catch (\Throwable $throw) {
-                    //
-                }
-            }
-            
             return new KfnUiException();
         });
     }

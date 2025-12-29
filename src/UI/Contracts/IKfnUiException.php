@@ -19,4 +19,14 @@ interface IKfnUiException
     public function getStatusText(): string|null;
 
     public function toArray(): array;
+
+    public static function all(): array;
+
+    public static function put(IResponseCode $responseCode, string|null $message = null): void;
+
+    public static function get(string $key, string|int|null $default = null): string|int;
+
+    public static function set(): void;
+
+    public static function forget(): void;
 }

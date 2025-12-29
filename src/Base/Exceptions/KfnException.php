@@ -20,6 +20,7 @@ use Kfn\Base\Contracts\IKfnException;
 use Kfn\Base\Contracts\IResponse;
 use Kfn\Base\Contracts\IResponseCode;
 use Kfn\Base\Enums\ResponseCode;
+use Kfn\UI\KfnUiException;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
@@ -86,13 +87,7 @@ class KfnException extends \Exception implements IKfnException, Arrayable, Respo
                 }
 
                 try {
-                    $excData = [
-                        'rc' => $this->rc::class,
-                        'name' => $this->rc->name,
-                        'message' => $this->getResponseMessage(),
-                    ];
-                    $isSecure = $request->isSecure() || (bool) config('app.secure');
-                    setcookie('kfn-exc', encrypt($excData), time() + 300, '/', '', $isSecure, true);
+                    KfnUiException::put($this->rc, $this->getResponseMessage());
 
                     $redirect->withInput()->send();
                 } catch (\Throwable $e) {
