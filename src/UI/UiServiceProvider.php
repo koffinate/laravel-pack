@@ -60,7 +60,7 @@ class UiServiceProvider extends ServiceProvider
 
         Blade::if('hasStack', function ($stackName) {
             if (is_string($stackName)) {
-                $stackName = array_map(fn ($it) => trim($it), explode(',', $sections));
+                $stackName = array_map(fn ($it) => trim($it), explode(',', $stackName));
             }
 
             return hasStack($stackName);
