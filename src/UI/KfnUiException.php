@@ -91,6 +91,7 @@ class KfnUiException implements IKfnUiException
     public static function get(string $key, string|int|null $default = null): string|int
     {
         $all = self::all();
+
         return $all[$key] ?? $default;
     }
 
