@@ -84,8 +84,10 @@ trait HasUI
         array|string|JsonResource|ResourceCollection|Arrayable|Paginator|CursorPaginator|null $data = null,
         string|null $message = null,
         IResponseCode $rc = ResponseCode::SUCCESS,
+        array $headers = [],
+        array $extra = []
     ): Response {
-        return new Response($data, $message, $rc);
+        return new Response($data, $message, $rc, $headers, $extra);
     }
 
     /**

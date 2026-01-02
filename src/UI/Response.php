@@ -16,7 +16,6 @@ use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Fluent;
 use Kfn\Base\Contracts\IResponseCode;
 use Kfn\Base\Enums\ResponseCode;
-use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class Response extends \Kfn\Base\Response implements Responsable
@@ -32,9 +31,10 @@ class Response extends \Kfn\Base\Response implements Responsable
         array|string|JsonResource|ResourceCollection|Arrayable|Paginator|CursorPaginator|null $data = null,
         string|null $message = null,
         IResponseCode $code = ResponseCode::SUCCESS,
+        array $headers = [],
         array $extra = []
     ) {
-        parent::__construct($data, $message, $code, $extra);
+        parent::__construct($data, $message, $code, $headers, $extra);
         $this->redirectOption = new Fluent();
         $this->viewOption = new Fluent();
     }
@@ -229,7 +229,7 @@ class Response extends \Kfn\Base\Response implements Responsable
         return $this;
     }
 
-    public function withCookie(string|Cookie $cookie): static
+    public function withCookie($cookie): static
     {
         $this->with['w_cookie'] = $cookie;
 

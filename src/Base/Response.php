@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Http\Response as HttpResponse;
+use Illuminate\Http\ResponseTrait;
 use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Support\Fluent;
 use Kfn\Base\Contracts\IResponse;
@@ -19,30 +20,48 @@ use Kfn\Base\Contracts\IResponseCode;
 use Kfn\Base\Contracts\IResponseResult;
 use Kfn\Base\Enums\ResponseCode;
 use Kfn\Base\Enums\ResponseResult;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 class Response implements IResponse, Responsable
 {
+    use ResponseTrait;
+
     /** @var IResponseResult */
     private static IResponseResult $resultAs = ResponseResult::DEFAULT;
 
     /** @var Closure|null */
     private static Closure|null $customResult = null;
 
+    /** @var int */
+    public static int $jsonOption = JSON_THROW_ON_ERROR;
+
+    public ResponseHeaderBag $headers;
+
+    protected string $content;
+    protected string $version;
+    protected int $statusCode;
+    protected string $statusText;
+    protected ?string $charset = null;
+
     /**
      * Response constructor.
      *
-     * @param JsonResource|ResourceCollection|Arrayable|LengthAwarePaginator|CursorPaginator|array|string|null $data
-     * @param string|null $message
-     * @param IResponseCode $code
-     * @param array $extra
+     * @param  JsonResource|ResourceCollection|Arrayable|LengthAwarePaginator|CursorPaginator|array|string|null  $data
+     * @param  string|null  $message
+     * @param  IResponseCode  $code
+     * @param  array  $headers
+     * @param  array  $extra
      */
     public function __construct(
         public JsonResource|ResourceCollection|Arrayable|LengthAwarePaginator|CursorPaginator|array|string|null $data = null,
         public string|null $message = null,
         public IResponseCode $code = ResponseCode::SUCCESS,
+        array $headers = [],
         public array $extra = [],
     ) {
         //
+        $this->headers = new ResponseHeaderBag($headers);
     }
 
     /**
@@ -50,15 +69,21 @@ class Response implements IResponse, Responsable
      *
      * @throws \JsonException
      */
-    public function toResponse($request): HttpResponse|JsonResponse|\Symfony\Component\HttpFoundation\Response
+    public function toResponse($request): HttpResponse|JsonResponse|SymfonyResponse
     {
         if ($request->expectsJson()) {
-            return response()->json($this->getResponseData(), $this->code->httpCode());
+            return response()->json(
+                $this->getResponseData(),
+                $this->code->httpCode(),
+                $this->headers->all(),
+                static::$jsonOption
+            );
         }
 
         return new HttpResponse(
             json_encode($this->getResponseData(), JSON_THROW_ON_ERROR),
-            $this->code->httpCode()
+            $this->code->httpCode(),
+            $this->headers->all()
         );
     }
 
@@ -118,7 +143,7 @@ class Response implements IResponse, Responsable
         // return array_merge($resp, ['payload' => $this->data]);
     }
 
-    private function getResponseNormal(JsonResource|ResourceCollection|array|null $payload): array
+    private function getResponseNormal(JsonResource|ResourceCollection|array|string|null $payload): array
     {
         $resp = array_merge([
             config('koffinate.base.result.rc_wrapper') => $this->code->name,
@@ -136,15 +161,18 @@ class Response implements IResponse, Responsable
         ]);
     }
 
-    private function getResponseSimple(array|null $payload): array
+    private function getResponseSimple(array|string|null $payload): array
     {
         return [
             self::getResultAs()->dataWrapper() => $payload,
         ];
     }
 
-    private function getResponseSelect2(array|null $payload): array
+    private function getResponseSelect2(array|string|null $payload): array
     {
+        if (is_string($payload)) {
+            $payload = [$payload];
+        }
         return [
             self::getResultAs()->dataWrapper() => collect($payload)->map(function ($it, $i) {
                 if (is_string($it)) {

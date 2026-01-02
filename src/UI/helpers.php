@@ -525,27 +525,6 @@ if (! function_exists('paginatedLink')) {
     }
 }
 
-if (! function_exists('cachedAsset')) {
-    /**
-     * @param string $path
-     * @param bool $secure
-     *
-     * @return string
-     */
-    function cachedAsset(string $path, bool|null $secure = null): string
-    {
-        $asset = str($path)->is('/^https?:\/\//i')
-            ? $path
-            : asset($path, $secure);
-        $version = config('cache.version');
-        if (! $version) {
-            $version = cache()->flexible('kfn-cache-version', [60, 70], fn () => uniqid());
-        }
-
-        return $asset.'?_v='.$version;
-    }
-}
-
 if (! function_exists('includeIf')) {
     /**
      * @param  string|null  $path

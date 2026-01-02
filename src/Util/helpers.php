@@ -34,6 +34,45 @@ if (! function_exists('f')) {
     }
 }
 
+if (! function_exists('cachedAsset')) {
+    /**
+     * @param  string  $path
+     * @param  bool  $secure
+     * @param  string|null  $version
+     *
+     * @return string
+     */
+    function cachedAsset(string $path, bool|null $secure = null, string|null $version = null): string
+    {
+        $asset = str($path)->is('/^https?:\/\//i')
+            ? $path
+            : asset($path, $secure);
+        $version ??= config('cache.version')
+            ?: cache()->flexible('kfn-cache-version', [60, 70], fn () => uniqid());
+
+        return $asset.'?_v='.$version;
+    }
+}
+
+if (! function_exists('pageAsset')) {
+    /**
+     * @param  string  $path
+     * @param  bool  $secure
+     * @param  string|null  $version
+     *
+     * @return string
+     */
+    function pageAsset(string $path, bool|null $secure = null, string|null $version = null): string
+    {
+        $asset = str($path)->is('/^https?:\/\//i')
+            ? $path
+            : asset($path, $secure);
+        $version ??= uniqid();
+
+        return $asset.'?_v='.$version;
+    }
+}
+
 if (! function_exists('prettySize')) {
     /**
      * Human-readable file size.
