@@ -173,6 +173,7 @@ class Response implements IResponse, Responsable
         if (is_string($payload)) {
             $payload = [$payload];
         }
+
         return [
             self::getResultAs()->dataWrapper() => collect($payload)->map(function ($it, $i) {
                 if (is_string($it)) {
