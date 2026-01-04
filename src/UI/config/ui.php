@@ -54,6 +54,11 @@ return [
      */
     'exception' => [
         /**
+         * enabling exception handling.
+         */
+        'enabled' => true,
+
+        /**
          * handling method if exception occurs.
          * available values: redirect, abort
          * default method is "abort".
