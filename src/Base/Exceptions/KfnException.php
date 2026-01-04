@@ -67,7 +67,7 @@ class KfnException extends \Exception implements IKfnException, Arrayable, Respo
     {
         $uiExceptionIsHandling = config('koffinate.ui.exception.handling_method');
         $uiExceptionIsHandling = is_bool($uiExceptionIsHandling) ? $uiExceptionIsHandling : false;
-        
+
         if ($uiExceptionIsHandling && $request->acceptsHtml() && ! static::shouldRenderException()) {
             if ('redirect' === config('koffinate.ui.exception.handling_method')) {
                 $redirectTo = config('koffinate.ui.exception.redirect_to');
