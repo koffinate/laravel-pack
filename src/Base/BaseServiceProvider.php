@@ -5,7 +5,6 @@ namespace Kfn\Base;
 use Illuminate\Cache\Events as CacheEvents;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use Kfn\Base\Console;
 use Kfn\Base\Exceptions\KfnException;
 use Kfn\Base\Listeners\Cache as CacheListeners;
 use Symfony\Component\VarDumper\VarDumper;

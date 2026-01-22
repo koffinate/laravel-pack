@@ -36,7 +36,7 @@ class WrittenListener
                     ->where('key', $data->get('key'))
                     ->where('store', $data->get('store'));
 
-                if (!empty($tags)) {
+                if (! empty($tags)) {
                     $cached->whereJsonContains('tags', $tags)
                         ->whereJsonLength('tags', count($tags));
                 }
