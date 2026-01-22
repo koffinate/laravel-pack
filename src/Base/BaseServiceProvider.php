@@ -2,8 +2,12 @@
 
 namespace Kfn\Base;
 
+use Illuminate\Cache\Events as CacheEvents;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Kfn\Base\Console;
 use Kfn\Base\Exceptions\KfnException;
+use Kfn\Base\Listeners\Cache as CacheListeners;
 use Symfony\Component\VarDumper\VarDumper;
 
 class BaseServiceProvider extends ServiceProvider
@@ -14,6 +18,25 @@ class BaseServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->publishes([__DIR__.'/config.php' => config_path('koffinate/base.php')], 'koffinate-base-config');
+        $this->replaceConfigRecursivelyFrom(__DIR__.'/config.php', 'cache');
+        $this->commands([
+            Console\CacheInvalidate::class,
+        ]);
+
+        if (cacheIsHandling()) {
+            $this->loadMigrationsFrom(__DIR__.'/database/migrations');
+
+            Event::listen(CacheEvents\KeyWritten::class, CacheListeners\WrittenListener::class);
+            Event::listen(CacheEvents\KeyForgotten::class, CacheListeners\ForgottenListener::class);
+            Event::listen(CacheEvents\CacheFlushed::class, CacheListeners\FlushedListener::class);
+            Event::listen('cache:*', function (string $eventName, array $data) {
+                if ('cache:cleared' === $eventName) {
+                    [$storeName, $tags] = $data;
+                    $listen = new CacheListeners\FlushedListener();
+                    $listen->handle(new CacheEvents\CacheFlushed($storeName, $tags));
+                }
+            });
+        }
 
         if (KfnException::shouldRenderException()) {
             try {
@@ -25,6 +48,7 @@ class BaseServiceProvider extends ServiceProvider
             } catch (\Throwable $th) {
                 $dumpServerStarted = false;
             }
+
             if (! $dumpServerStarted) {
                 VarDumper::setHandler(function ($var, ?string $label = null) {
                     if (null !== $label) {

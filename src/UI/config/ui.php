@@ -32,6 +32,15 @@ return [
         'vendor' => env('KFN_VENDOR_URL', ''),
     ],
 
+    'html' => [
+        'meta' => [
+            ['name' => 'description', 'content' => ''],
+            ['name' => 'keywords', 'content' => 'yusronarif, koffinate, laravel, php'],
+            ['name' => 'author', 'content' => 'Yusron Arif <yusron.arif4::at::gmail.com>'],
+            ['name' => 'generator', 'content' => 'Koffinate'],
+        ],
+    ],
+
     /**
      * The feedback template to be used.
      *

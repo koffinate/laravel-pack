@@ -5,6 +5,7 @@ namespace Kfn\Database\Eloquent;
 use Illuminate\Database\Eloquent\Builder as BaseBuilder;
 use Illuminate\Database\Eloquent\Model as BaseModel;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 abstract class Model extends BaseModel implements HasModel
@@ -34,6 +35,23 @@ abstract class Model extends BaseModel implements HasModel
     public static function self(): static
     {
         return new static();
+    }
+
+    /**
+     * @param  array|object  $data
+     *
+     * @return array
+     * @throws \Throwable
+     */
+    public static function toFillable(array|object $data): array
+    {
+        $fillable = new static()->getFillable();
+
+        if (is_object($data)) {
+            $data = fluent($data)->toArray();
+        }
+
+        return Arr::only($data, Arr::flatten($fillable));
     }
 
     /**

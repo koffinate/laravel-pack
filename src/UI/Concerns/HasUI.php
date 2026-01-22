@@ -52,12 +52,7 @@ trait HasUI
      *
      * @var array
      */
-    private array $pageMeta = [
-        'description' => '',
-        'keywords' => 'yusronarif, koffinate, laravel, php',
-        'author' => 'Yusron Arif <yusron.arif4::at::gmail.com>',
-        'generator' => 'Koffinate',
-    ];
+    private array $pageMeta = [];
 
     /**
      * Breadcrumbs Collection.
@@ -156,7 +151,7 @@ trait HasUI
         $this->setPageMeta('csrf_token', csrf_token());
 
         $this->controllerData['activeUser'] = auth()->user();
-        $this->controllerData['pageMeta'] = $this->pageMeta;
+        $this->controllerData['pageMeta'] = array_merge((array) config('koffinate.ui.html.meta'), $this->pageMeta);
         $this->controllerData['breadCrumbs'] = $this->breadCrumbs ?? collect();
         if (! array_key_exists('isEditMode', $this->controllerData)) {
             $this->controllerData['isEditMode'] = false;
@@ -251,14 +246,17 @@ trait HasUI
     /**
      * Set page meta.
      *
-     * @param  string  $key
+     * @param  string|array  $key
      * @param  mixed  $value
      *
      * @return static
      */
-    protected function setPageMeta(string $key, mixed $value): static
+    protected function setPageMeta(string|array $key, mixed $value = null): static
     {
         $this->pageMeta[$key] = $value;
+        $this->pageMeta[] = is_array($key)
+            ? $key
+            : ['name' => $key, 'content' => $value];
 
         return $this;
     }

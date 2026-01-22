@@ -3,9 +3,25 @@
 use Illuminate\Http\Resources\Json\JsonResource;
 
 return [
+    /**
+     * Force json response.
+     */
     'force_json' => true,
     'force_json_prefixes' => ['api'],
     'api_prefixes' => ['api'],
+
+    /**
+     * Cache handling.
+     */
+    'cache' => [
+        'handling' => (bool) env('KFN_CACHE_HANDLING', false),
+
+        /**
+         * Skip keys from invalidated handling.
+         * fill the key with: null, array, or string.
+         */
+        'skip_invalidate_keys' => env('KFN_CACHE_SKIP_KEYS', null),
+    ],
 
     /**
      * Debugging handler.
