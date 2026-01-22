@@ -16,7 +16,7 @@ class CacheInvalidate extends Command implements Isolatable
      * @var string
      */
     protected $signature = 'cache:invalidate '.
-    '{stores? : Which stores to invalidate}';
+        '{stores? : Which stores to invalidate}';
 
     /**
      * The console command description.
@@ -45,21 +45,21 @@ class CacheInvalidate extends Command implements Isolatable
      */
     public function handle(): void
     {
-        $stores = array_filter(explode(',', $this->argument('stores')), fn ($it) => !empty($it));
+        $stores = array_filter(explode(',', $this->argument('stores')), fn ($it) => ! empty($it));
         $skipKeys = config('koffinate.base.cache.skip_invalidate_keys');
 
         $cached = Cached::query()
             ->select('id', 'key', 'store', 'expires_at')
             ->where('expires_at', '<', now()->toAtomString());
 
-        if (!empty($skipKeys)) {
+        if (! empty($skipKeys)) {
             is_array($skipKeys)
                 ? $cached->whereNotIn('key', $skipKeys)
                 : $cached->where('key', '!=', $skipKeys);
         }
 
         $fromStore = '';
-        if (!empty($stores)) {
+        if (! empty($stores)) {
             $fromStore = ' from store(s) '.implode(', ', $stores);
 
             if (count($stores) === 1) {
@@ -72,10 +72,11 @@ class CacheInvalidate extends Command implements Isolatable
         $this->components->alert('Invalidating caches'.$fromStore);
         $this->newLine();
 
-        if (!cacheIsHandling()) {
+        if (! cacheIsHandling()) {
             $this->newLine();
             $this->components->warn('THIS FEATURE WAS DISABLED');
             $this->components->info('you can enable this feature via config "koffinate.base.cache.handling" or set KFN_CACHE_HANDLING to true on env');
+
             return;
         }
 
@@ -83,7 +84,7 @@ class CacheInvalidate extends Command implements Isolatable
 
         $cached->chunkById(100, function ($caches) {
             $ids = [];
-            ++self::$chunkIncr;
+            self::$chunkIncr++;
 
             $this->components->task('invalidating cache #'.static::$chunkIncr, function () use ($caches, &$ids) {
                 foreach ($caches as $cache) {
@@ -94,7 +95,7 @@ class CacheInvalidate extends Command implements Isolatable
                     } elseif ($cacheService->forget($cache->key)) {
                         $ids[] = $cache->id;
                     } else {
-                        ++static::$totalFailed;
+                        static::$totalFailed++;
 
                         if ($this->output->isVerbose()) {
                             self::$tempFailKeys[] = $cache->key;
@@ -106,12 +107,11 @@ class CacheInvalidate extends Command implements Isolatable
                     }
                 }
 
-                if (!empty($ids)) {
+                if (! empty($ids)) {
                     try {
                         if (Cached::query()->whereIn('id', $ids)->delete()) {
                             self::$totalInvalidated += count($ids);
                         }
-
                     } catch (\Throwable $tr) {
                         $context = [
                             'message' => $tr->getMessage(),
@@ -142,7 +142,7 @@ class CacheInvalidate extends Command implements Isolatable
                     self::$failKeys[] = self::$tempFailKeys;
                     self::$tempFailKeys = [];
                 }
-                if (!empty(self::$failKeys)) {
+                if (! empty(self::$failKeys)) {
                     table(['failed key', 'failed key', 'failed key'], self::$failKeys);
                 }
             }
