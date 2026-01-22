@@ -30,11 +30,13 @@ abstract class Model extends BaseModel implements HasModel
     }
 
     /**
+     * @param  array  $attributes
+     *
      * @return static
      */
-    public static function self(): static
+    public static function self(array $attributes = []): static
     {
-        return new static();
+        return new static($attributes);
     }
 
     /**
@@ -45,7 +47,7 @@ abstract class Model extends BaseModel implements HasModel
      */
     public static function toFillable(array|object $data): array
     {
-        $fillable = new static()->getFillable();
+        $fillable = static::self()->getFillable();
 
         if (is_object($data)) {
             $data = fluent($data)->toArray();
@@ -67,7 +69,7 @@ abstract class Model extends BaseModel implements HasModel
      */
     public static function cleanQuery(): BaseBuilder
     {
-        $instance = new static;
+        $instance = static::self();
 
         return $instance->registerGlobalScopes($instance->newModelQuery());
     }
@@ -77,7 +79,7 @@ abstract class Model extends BaseModel implements HasModel
      */
     public static function rawQuery(): QueryBuilder
     {
-        $instance = new static();
+        $instance = static::self();
 
         return DB::connection($instance->getConnectionName())->table($instance->getTable());
     }
