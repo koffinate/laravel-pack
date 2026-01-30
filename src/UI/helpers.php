@@ -86,7 +86,6 @@ if (! function_exists('setDefaultRequest')) {
             // session()->flashInput($data);
             $force ? $request->merge($data) : $request->mergeIfMissing($data);
             $request->flashExcept('_token');
-
         } catch (Exception $e) {
             //throw_if(hasDebugModeEnabled(), $e);
             $context = [
