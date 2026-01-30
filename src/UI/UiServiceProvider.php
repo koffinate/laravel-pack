@@ -2,9 +2,12 @@
 
 namespace Kfn\UI;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Kfn\UI\Contracts\IKfnUiException;
+use Kfn\UI\Middlewares\KfnUiMiddleware;
 
 class UiServiceProvider extends ServiceProvider
 {
@@ -33,10 +36,17 @@ class UiServiceProvider extends ServiceProvider
     /**
      * Bootstrap services.
      *
+     * @param  Router  $router
+     *
      * @return void
+     * @throws BindingResolutionException
      */
-    public function boot(): void
+    public function boot(Router $router): void
     {
+        $kernel = $this->app->make('Illuminate\Contracts\Http\Kernel');
+
+        $kernel->pushMiddleware(KfnUiMiddleware::class);
+
         $this->publishes([__DIR__.'/config/ui.php' => config_path('koffinate/ui.php')], 'koffinate-ui-config');
         $this->publishes([__DIR__.'/config/plugins.php' => config_path('koffinate/plugins.php')], 'koffinate-ui-config');
         $this->publishes([__DIR__.'/views/components' => resource_path('views/vendor/koffinate/ui/components')], 'koffinate-ui-resource');

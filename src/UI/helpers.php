@@ -65,16 +65,40 @@ if (! function_exists('setDefaultRequest')) {
      */
     function setDefaultRequest(string|array $name, mixed $value = null, bool $force = true): void
     {
-        $request = app('request');
-        if (empty(session()->get('_flash.old', []))) {
-            try {
-                $data = is_array($name) ? $name : array_merge(session()->getOldInput(), [$name => $value]);
+        // make sure the page is fresh, not redirected.
+        if (isRedirected()) {
+            return;
+        }
 
-                session()->flashInput($data);
-                $force ? $request->merge($data) : $request->mergeIfMissing($data);
-            } catch (Exception $e) {
-                throw_if(hasDebugModeEnabled(), $e);
+        $request = app('request');
+
+        if (is_string($name)) {
+            $name = [$name => $value];
+        }
+
+        $data = [];
+        foreach ($name as $key => $val) {
+            // $data[$key] = $request->old($key, $request->__get($key) ?? $val);
+            $data[$key] = $request->__get($key) ?? $val;
+        }
+
+        try {
+            // session()->flashInput($data);
+            $force ? $request->merge($data) : $request->mergeIfMissing($data);
+            $request->flashExcept('_token');
+
+        } catch (Exception $e) {
+            //throw_if(hasDebugModeEnabled(), $e);
+            $context = [
+                'code' => $e->getCode(),
+                'message' => $e->getMessage(),
+            ];
+
+            if (hasDebugModeEnabled()) {
+                $context['trace'] = explode(PHP_EOL, $e->getTraceAsString());
             }
+
+            app('log')->error('fail on setDefaultRequest:', $context);
         }
     }
 }
@@ -87,6 +111,18 @@ if (! function_exists('kfnException')) {
     {
         // return new KfnUiException();
         return app('kfnExceptionMessage');
+    }
+}
+
+if (! function_exists('isRedirected')) {
+    /**
+     * @return bool
+     */
+    function isRedirected(): bool
+    {
+        $redirected = session('was_redirected', false) ?? false;
+
+        return is_bool($redirected) ? $redirected : false;
     }
 }
 
@@ -221,13 +257,17 @@ if (! function_exists('isDev')) {
      */
     function isDev(): bool
     {
-        if (Session::has('dev_mode')) {
-            return Session::get('dev_mode', false);
+        if (session()->has('dev_mode')) {
+            $devMode = session('dev_mode', false);
+
+            return is_bool($devMode) ? $devMode : false;
         }
 
-        $dev = (string) env('APP_DEV_MODE', 'off');
+        if (in_array(config('app.mode'), ['dev', 'development'])) {
+            return true;
+        }
 
-        return in_array(strtolower($dev), ['true', '1', 'on']);
+        return in_array(config('app.env'), ['dev', 'development']);
     }
 }
 
