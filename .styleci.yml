@@ -1,11 +1,10 @@
+version: 8.2
+
 preset: laravel
 
-enabled:
-  - align_multiline_comment
-  - class_attributes_separation
-  - class_definition
+disabled:
+  - laravel_braces
+  - laravel_phpdoc_alignment
+  - laravel_phpdoc_separation
+  - normalize_nullable_type_declaration
   - control_structure_continuation_position
-  - nullable_type_declaration
-  - ordered_types
-  - phpdoc_separation
-  - phpdoc_types_order
