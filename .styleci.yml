@@ -9,6 +9,3 @@ enabled:
   - ordered_types
   - phpdoc_separation
   - phpdoc_types_order
-
-disabled:
-  - no_superfluous_phpdoc_tags
