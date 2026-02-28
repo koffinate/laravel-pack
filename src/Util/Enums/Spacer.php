@@ -22,7 +22,8 @@ enum Spacer: int
                 self::THIN => '&nbsp;&nbsp;',
                 self::WIDE => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
             };
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             if (hasDebugModeEnabled()) {
                 throw $e;
             }
@@ -43,7 +44,8 @@ enum Spacer: int
                 self::THIN => '..',
                 self::WIDE => '.. .. .. ..',
             };
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             if (hasDebugModeEnabled()) {
                 throw $e;
             }
@@ -64,7 +66,8 @@ enum Spacer: int
                 self::THIN => '->',
                 self::WIDE => '------->',
             };
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             if (hasDebugModeEnabled()) {
                 throw $e;
             }

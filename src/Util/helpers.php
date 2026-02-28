@@ -9,7 +9,8 @@ use Illuminate\Support\Str;
 
 if (! function_exists('user')) {
     /**
-     * @param string|null $guard
+     * @param  string|null  $guard
+     *
      * @return Authenticatable|null
      */
     function user(string|null $guard = null): Authenticatable|null
@@ -93,12 +94,11 @@ if (! function_exists('prettySize')) {
 
 if (! function_exists('trimAll')) {
     /**
-     * @param  null|string  $string
+     * @param  string|null  $string
      * @param  string  $type
      * @param  string  $pattern
      *
      * @return string
-     *
      * @throws Exception
      */
     function trimAll(string|null $string, string $type = 'smart', string $pattern = '\W+'): string
@@ -122,7 +122,8 @@ if (! function_exists('trimAll')) {
                     preg_replace('/^'.$pattern.'|'.$pattern.'$/i', '', $string),
                 ),
             };
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
         }
 
         return '';
@@ -195,18 +196,18 @@ if (! function_exists('hasDebugModeEnabled')) {
 
 if (! function_exists('carbon')) {
     /**
-     * @param  string|CarbonInterface|DateTimeInterface|null  $datetime
+     * @param  CarbonInterface|DateTimeInterface|string|null  $datetime
      * @param  DateTimeZone|string|null  $timezone
-     * @param  string|DateTimeZone|null  $fromTimezone
+     * @param  DateTimeZone|string|null  $fromTimezone
      * @param  string|null  $locale
      * @param  bool  $isMutable
      *
      * @return CarbonInterface
      */
     function carbon(
-        string|CarbonInterface|DateTimeInterface|null $datetime = null,
-        string|DateTimeZone|null $timezone = null,
-        string|DateTimeZone|null $fromTimezone = null,
+        CarbonInterface|DateTimeInterface|string|null $datetime = null,
+        DateTimeZone|string|null $timezone = null,
+        DateTimeZone|string|null $fromTimezone = null,
         string|null $locale = null,
         bool $isMutable = false,
     ): CarbonInterface {
@@ -225,7 +226,8 @@ if (! function_exists('carbon')) {
 
         try {
             Carbon::setLocale($locale);
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             //
         }
 
@@ -246,21 +248,21 @@ if (! function_exists('carbon')) {
 
 if (! function_exists('carbonFormat')) {
     /**
-     * @param  string|CarbonInterface|DateTimeInterface|null  $datetime
+     * @param  CarbonInterface|DateTimeInterface|string|null  $datetime
      * @param  string  $isoFormat
      * @param  string|null  $format
-     * @param  string|DateTimeZone|null  $timezone
-     * @param  string|DateTimeZone|null  $fromTimezone
+     * @param  DateTimeZone|string|null  $timezone
+     * @param  DateTimeZone|string|null  $fromTimezone
      * @param  bool  $showTz
      *
      * @return string
      */
     function carbonFormat(
-        string|CarbonInterface|DateTimeInterface|null $datetime = null,
+        CarbonInterface|DateTimeInterface|string|null $datetime = null,
         string $isoFormat = 'L LT',
         string|null $format = null,
-        string|DateTimeZone|null $timezone = null,
-        string|DateTimeZone|null $fromTimezone = null,
+        DateTimeZone|string|null $timezone = null,
+        DateTimeZone|string|null $fromTimezone = null,
         bool|null $showTz = null,
     ): string {
         $fromTimezone ??= config('app.timezone');
@@ -292,10 +294,12 @@ if (! function_exists('carbonFormat')) {
         if (! is_object($datetime)) {
             if (is_null($datetime)) {
                 $datetime = Carbon::now($fromTimezone);
-            } else {
+            }
+            else {
                 try {
                     $datetime = Carbon::parse($datetime, $fromTimezone);
-                } catch (Exception $e) {
+                }
+                catch (Exception $e) {
                     return '';
                 }
             }
@@ -312,8 +316,8 @@ if (! function_exists('carbonFromFormat')) {
     /**
      * @param  string  $date
      * @param  string  $format
-     * @param  string|DateTimeZone|null  $timezone
-     * @param  string|DateTimeZone|null  $fromTimezone
+     * @param  DateTimeZone|string|null  $timezone
+     * @param  DateTimeZone|string|null  $fromTimezone
      * @param  bool  $isMutable
      *
      * @return CarbonInterface|null
@@ -321,8 +325,8 @@ if (! function_exists('carbonFromFormat')) {
     function carbonFromFormat(
         string $date,
         string $format = 'Y-m-d H:i:s',
-        string|DateTimeZone|null $timezone = null,
-        string|DateTimeZone|null $fromTimezone = null,
+        DateTimeZone|string|null $timezone = null,
+        DateTimeZone|string|null $fromTimezone = null,
         bool $isMutable = false,
     ): CarbonInterface|null {
         $fromTimezone ??= config('app.timezone');
@@ -341,7 +345,8 @@ if (! function_exists('carbonFromFormat')) {
             }
 
             return $carbon;
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             return null;
         }
     }
@@ -405,11 +410,12 @@ if (! function_exists('toFluent')) {
         if (! $data instanceof Fluent) {
             try {
                 $data = new Fluent($data ?? []);
-            } catch (Exception $e) {
+            }
+            catch (Exception $e) {
                 if (hasDebugModeEnabled()) {
                     throw $e;
                 }
-                $data = new Fluent();
+                $data = new Fluent;
             }
         }
 
@@ -436,11 +442,11 @@ if (! function_exists('hasRoute')) {
     /**
      * Existing Route by Name.
      *
-     * @param  string|array  $name
+     * @param  array|string  $name
      *
      * @return bool
      */
-    function hasRoute(string|array $name): bool
+    function hasRoute(array|string $name): bool
     {
         return app('router')->has($name);
     }
@@ -452,12 +458,12 @@ if (! function_exists('routed')) {
      * with '#' fallback.
      *
      * @param  string  $name
-     * @param  string|array  $params
+     * @param  array|string  $params
      * @param  bool  $absolute
      *
      * @return string
      */
-    function routed(string $name, string|array $params = [], bool $absolute = true): string
+    function routed(string $name, array|string $params = [], bool $absolute = true): string
     {
         if (hasRoute($name)) {
             return app('url')->route($name, $params, $absolute);
@@ -473,17 +479,18 @@ if (! function_exists('to_routed')) {
      * with '#' fallback.
      *
      * @param  string  $name
-     * @param  string|array  $params
+     * @param  array|string  $params
      * @param  int  $status
      * @param  array  $headers
      *
      * @return \Illuminate\Http\RedirectResponse
      */
-    function to_routed(string $name, string|array $params = [], int $status = 302, array $headers = []): \Illuminate\Http\RedirectResponse
+    function to_routed(string $name, array|string $params = [], int $status = 302, array $headers = []): \Illuminate\Http\RedirectResponse
     {
         try {
             return redirect()->route($name, $params, $status, $headers);
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             return back($status, $headers);
         }
     }
@@ -491,12 +498,12 @@ if (! function_exists('to_routed')) {
 
 if (! function_exists('activeRoute')) {
     /**
-     * @param  string|array  $route
-     * @param  string|array  $params
+     * @param  array|string  $route
+     * @param  array|string  $params
      *
      * @return bool
      */
-    function activeRoute(string|array $route = [], string|array $params = []): bool
+    function activeRoute(array|string $route = [], array|string $params = []): bool
     {
         if (empty($route = trim($route))) {
             return false;
@@ -538,10 +545,12 @@ if (! function_exists('activeRoute')) {
                             )->value != $value) {
                                 return false;
                             }
-                        } catch (Exception $e) {
+                        }
+                        catch (Exception $e) {
                             return false;
                         }
-                    } else {
+                    }
+                    else {
                         if ($requestRoute->parameter($key) != $value) {
                             return false;
                         }
@@ -550,7 +559,8 @@ if (! function_exists('activeRoute')) {
 
                 return true;
             }
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
         }
 
         return false;

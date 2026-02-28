@@ -37,7 +37,7 @@ class ViewAssetManager implements \Kfn\UI\Contracts\ViewAssetManager
         if (! self::$assets) {
             self::$assets = collect();
             self::$availablePlugins = collect(config('koffinate.plugins.items'));
-            self::$readyPlugins = new Fluent();
+            self::$readyPlugins = new Fluent;
 
             $assetType = config('koffinate.plugins.asset_type');
             $scriptType = config('koffinate.plugins.script_type');
@@ -58,18 +58,18 @@ class ViewAssetManager implements \Kfn\UI\Contracts\ViewAssetManager
      */
     public static function init(): static
     {
-        return new static();
+        return new static;
     }
 
     /**
      * Add Assets.
      *
-     * @param  string|array  $name
+     * @param  array|string  $name
      * @param  string  $source
      *
      * @return $this
      */
-    public function add(string|array $name, string $source = 'local'): static
+    public function add(array|string $name, string $source = 'local'): static
     {
         if (in_array($source, ['local', 'vendor'])) {
             $availablePlugins = self::$availablePlugins->filter(fn ($it, $key) => in_array($key, (array) $name));
@@ -86,11 +86,11 @@ class ViewAssetManager implements \Kfn\UI\Contracts\ViewAssetManager
     /**
      * Check assets already loaded.
      *
-     * @param  string|array  $name
+     * @param  array|string  $name
      *
      * @return bool
      */
-    public function loaded(string|array $name): bool
+    public function loaded(array|string $name): bool
     {
         return self::$assets->has($name);
     }
@@ -102,9 +102,10 @@ class ViewAssetManager implements \Kfn\UI\Contracts\ViewAssetManager
      */
     public function build(): void
     {
-        if ('vite' === self::$assetType) {
+        if (self::$assetType === 'vite') {
             $this->buildViteAsset();
-        } else {
+        }
+        else {
             $this->buildPluginAsset();
         }
 
@@ -172,7 +173,7 @@ class ViewAssetManager implements \Kfn\UI\Contracts\ViewAssetManager
         if (class_exists(\Illuminate\Foundation\Vite::class)) {
             return;
         }
-        $result = new Fluent();
+        $result = new Fluent;
 
         self::$assets->whenNotEmpty(function (Collection $assets) use (&$result) {
             $vite = app(\Illuminate\Foundation\Vite::class);
@@ -183,7 +184,7 @@ class ViewAssetManager implements \Kfn\UI\Contracts\ViewAssetManager
                     foreach ($asset->get($assetType) as $path) {
                         $result[$assetType] .= preg_match($this->httpPattern, $path)
                             ? (
-                                'css' === $assetType
+                                $assetType === 'css'
                                     ? "<link href='{$path}' rel='stylesheet'>"
                                     : "<script type='{$scriptType}' src='{$path}'></script>"
                             )
@@ -204,7 +205,7 @@ class ViewAssetManager implements \Kfn\UI\Contracts\ViewAssetManager
      */
     private function buildPluginAsset(): void
     {
-        $result = new Fluent();
+        $result = new Fluent;
 
         self::$assets->whenNotEmpty(function (Collection $assets) use (&$result) {
             $scriptType = self::$scriptType;
@@ -226,12 +227,12 @@ class ViewAssetManager implements \Kfn\UI\Contracts\ViewAssetManager
                     $pluginAsset = '';
                     foreach ($asset->get($assetType) as $path) {
                         $path = preg_match($this->httpPattern, $path) ? $path : (
-                            'vendor' === $asset->get('source')
+                            $asset->get('source') === 'vendor'
                                 ? vendor($path)
                                 : cachedAsset($localPath.$path)
                         );
 
-                        $pluginAsset .= 'css' === $assetType
+                        $pluginAsset .= $assetType === 'css'
                             ? "<link href='{$path}' rel='stylesheet'>"
                             : "<script type='{$scriptType}' src='{$path}'></script>";
                     }
@@ -247,7 +248,7 @@ class ViewAssetManager implements \Kfn\UI\Contracts\ViewAssetManager
     /**
      * Generate an asset path for the application.
      *
-     * @param string $path
+     * @param  string  $path
      *
      * @return string
      */
@@ -259,7 +260,7 @@ class ViewAssetManager implements \Kfn\UI\Contracts\ViewAssetManager
     /**
      * Generate an asset path for the application.
      *
-     * @param string $path
+     * @param  string  $path
      *
      * @return string
      */

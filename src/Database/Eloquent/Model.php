@@ -10,11 +10,11 @@ use Illuminate\Support\Facades\DB;
 
 abstract class Model extends BaseModel implements HasModel
 {
-    /** @inheritdoc */
+    /** {@inheritdoc} */
     protected static string $builder = Builder::class;
 
     /**
-     * @param array $attributes
+     * @param  array  $attributes
      */
     public function __construct(array $attributes = [])
     {

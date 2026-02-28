@@ -25,7 +25,7 @@ use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
-class KfnException extends \Exception implements IKfnException, Arrayable, Responsable
+class KfnException extends \Exception implements Arrayable, IKfnException, Responsable
 {
     /** @var string */
     public static string $result;
@@ -58,7 +58,7 @@ class KfnException extends \Exception implements IKfnException, Arrayable, Respo
     /**
      * {@inheritDoc}
      *
-     * @param $request
+     * @param  $request
      *
      * @return JsonResponse|Response
      * @throws JsonException
@@ -69,14 +69,15 @@ class KfnException extends \Exception implements IKfnException, Arrayable, Respo
         $uiExceptionIsHandling = is_bool($uiExceptionIsHandling) ? $uiExceptionIsHandling : false;
 
         if ($uiExceptionIsHandling && $request->acceptsHtml() && ! static::shouldRenderException()) {
-            if ('redirect' === config('koffinate.ui.exception.handling_method')) {
+            if (config('koffinate.ui.exception.handling_method') === 'redirect') {
                 $redirectTo = config('koffinate.ui.exception.redirect_to');
 
                 $prevUri = new Uri($request->headers->get('referer') ?? '');
-                if ('back' === $redirectTo) {
+                if ($redirectTo === 'back') {
                     $redirect = redirect()->back();
                     $prevPath = $prevUri->path();
-                } else {
+                }
+                else {
                     $redirect = redirect()->to($redirectTo);
                     $redirectUri = new Uri($redirectTo ?? '');
                     $prevPath = $redirectUri->path();
@@ -93,7 +94,8 @@ class KfnException extends \Exception implements IKfnException, Arrayable, Respo
                     KfnUiException::put($this->rc, $this->getResponseMessage());
 
                     $redirect->withInput()->send();
-                } catch (\Throwable $e) {
+                }
+                catch (\Throwable $e) {
                     // continue to the next handler
                 }
             }
@@ -234,10 +236,10 @@ class KfnException extends \Exception implements IKfnException, Arrayable, Respo
     }
 
     /**
-     * @param Request $request
-     * @param Throwable $throwable
+     * @param  Request  $request
+     * @param  Throwable  $throwable
      *
-     * @return Throwable|static
+     * @return static|Throwable
      */
     public static function mapToException(Request $request, Throwable $throwable): static|Throwable
     {

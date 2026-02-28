@@ -4,13 +4,13 @@ namespace Kfn\Base;
 
 class Request extends \Illuminate\Http\Request
 {
-    /** @inheritDoc */
+    /** {@inheritDoc} */
     public function expectsJson(): bool
     {
         return $this->isReturnJson() ?? parent::expectsJson();
     }
 
-    /** @inheritDoc */
+    /** {@inheritDoc} */
     public function wantsJson(): bool
     {
         return $this->isReturnJson() ?? parent::wantsJson();

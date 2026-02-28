@@ -57,10 +57,10 @@ interface IKfnException
     ): IResponse|JsonResponse|SymfonyResponse;
 
     /**
-     * @param Request $request
-     * @param Throwable $throwable
+     * @param  Request  $request
+     * @param  Throwable  $throwable
      *
-     * @return Throwable|static
+     * @return static|Throwable
      */
     public static function mapToException(Request $request, Throwable $throwable): static|Throwable;
 }

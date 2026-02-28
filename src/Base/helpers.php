@@ -20,7 +20,7 @@ if (! function_exists('fromResource')) {
     /**
      * Generate a collection from resource.
      *
-     * @param JsonResource $resource
+     * @param  JsonResource  $resource
      *
      * @return mixed
      */

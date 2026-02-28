@@ -12,7 +12,7 @@ class DatabaseServiceProvider extends ServiceProvider
         //
     }
 
-    /** @inheritDoc */
+    /** {@inheritDoc} */
     public function register(): void
     {
         //

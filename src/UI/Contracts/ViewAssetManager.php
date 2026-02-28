@@ -16,21 +16,21 @@ interface ViewAssetManager
     /**
      * Add Assets.
      *
-     * @param  string|array  $name
+     * @param  array|string  $name
      * @param  string  $source
      *
      * @return $this
      */
-    public function add(string|array $name, string $source = 'local'): static;
+    public function add(array|string $name, string $source = 'local'): static;
 
     /**
      * Check assets already loaded.
      *
-     * @param  string|array  $name
+     * @param  array|string  $name
      *
      * @return bool
      */
-    public function loaded(string|array $name): bool;
+    public function loaded(array|string $name): bool;
 
     /**
      * Build Assets.
@@ -72,7 +72,7 @@ interface ViewAssetManager
     /**
      * Generate an asset path for the application.
      *
-     * @param string $path
+     * @param  string  $path
      *
      * @return string
      */
@@ -81,7 +81,7 @@ interface ViewAssetManager
     /**
      * Generate an asset path for the application.
      *
-     * @param string $path
+     * @param  string  $path
      *
      * @return string
      */

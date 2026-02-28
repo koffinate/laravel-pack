@@ -24,7 +24,7 @@ interface IKfnUiException
 
     public static function put(IResponseCode $responseCode, string|null $message = null): void;
 
-    public static function get(string $key, string|int|null $default = null): string|int;
+    public static function get(string $key, int|string|null $default = null): int|string;
 
     public static function set(): void;
 

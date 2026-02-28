@@ -13,10 +13,10 @@ use Symfony\Component\HttpFoundation\Response;
 enum ResponseCode implements IResponseCode
 {
     use From;
-    use Values;
-    use Options;
     use InvokableCases;
+    use Options;
     use TResponseCode;
+    use Values;
 
     case SUCCESS;
     case CREATED;

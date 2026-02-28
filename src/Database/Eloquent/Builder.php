@@ -7,7 +7,7 @@ use Illuminate\Pagination\Paginator;
 
 class Builder extends BaseBuilder
 {
-    /** @inheritdoc */
+    /** {@inheritdoc} */
     public function paginate($perPage = null, $columns = ['*'], $pageName = 'page', $page = null, $total = null)
     {
         $page = $page ?: Paginator::resolveCurrentPage($pageName);

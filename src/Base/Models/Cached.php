@@ -10,22 +10,22 @@ class Cached extends Model
 {
     use HasUuids;
 
-    /** @inheritdoc */
+    /** {@inheritdoc} */
     protected $table = 'cached';
 
-    /** @inheritdoc */
+    /** {@inheritdoc} */
     public $timestamps = false;
 
-    /** @inheritdoc */
+    /** {@inheritdoc} */
     protected $guarded = [];
 
-    /** @inheritdoc */
+    /** {@inheritdoc} */
     protected $dateFormat = 'Y-m-d\TH:i:s.uP';
 
     /** @var bool */
     public static bool $catchEvents = true;
 
-    /** @inheritdoc */
+    /** {@inheritdoc} */
     protected static function booting(): void
     {
         parent::booting();
@@ -51,7 +51,7 @@ class Cached extends Model
         }
     }
 
-    /** @inheritdoc */
+    /** {@inheritdoc} */
     protected function casts(): array
     {
         return [

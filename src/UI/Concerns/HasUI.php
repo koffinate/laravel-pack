@@ -76,7 +76,7 @@ trait HasUI
     private DataTableButtons|null $kfnTable = null;
 
     protected function response(
-        array|string|JsonResource|ResourceCollection|Arrayable|Paginator|CursorPaginator|null $data = null,
+        array|Arrayable|CursorPaginator|JsonResource|Paginator|ResourceCollection|string|null $data = null,
         string|null $message = null,
         IResponseCode $rc = ResponseCode::SUCCESS,
         array $headers = [],
@@ -91,9 +91,9 @@ trait HasUI
      * @param  string  $view
      * @param  bool  $asResponse
      *
-     * @return View|Response|\Inertia\Response
+     * @return \Inertia\Response|Response|View
      */
-    protected function view(string $view, bool|null $asResponse = null): View|Response|\Inertia\Response
+    protected function view(string $view, bool|null $asResponse = null): \Inertia\Response|Response|View
     {
         $renderAsResponse = is_bool($asResponse)
             ? $asResponse
@@ -120,10 +120,10 @@ trait HasUI
         return $this->renderingView($view, $this->controllerData, $renderAsResponse);
     }
 
-    protected function renderingView(string|View|\Inertia\Response $view, array $data = [], bool $asResponse = false): View|Response|\Inertia\Response
+    protected function renderingView(\Inertia\Response|string|View $view, array $data = [], bool $asResponse = false): \Inertia\Response|Response|View
     {
         if ($asResponse) {
-            $resp = new Response();
+            $resp = new Response;
 
             return $resp->view($view, $data);
         }
@@ -171,7 +171,6 @@ trait HasUI
      * @param  mixed  $value
      *
      * @return static
-     *
      * @throws \Exception
      */
     protected function setData(string $name, mixed $value): static
@@ -236,7 +235,8 @@ trait HasUI
             }
             view()->share('pageTitle', $title);
             unset($this->controllerData['pageTitle']);
-        } else {
+        }
+        else {
             $this->controllerData['pageTitle'] = $title;
         }
 
@@ -246,12 +246,12 @@ trait HasUI
     /**
      * Set page meta.
      *
-     * @param  string|array  $key
+     * @param  array|string  $key
      * @param  mixed  $value
      *
      * @return static
      */
-    protected function setPageMeta(string|array $key, mixed $value = null): static
+    protected function setPageMeta(array|string $key, mixed $value = null): static
     {
         $this->pageMeta[$key] = $value;
         $this->pageMeta[] = is_array($key)
@@ -264,11 +264,11 @@ trait HasUI
     /**
      * Set BreadCrumb.
      *
-     * @param  string|array  $breadcrumb
+     * @param  array|string  $breadcrumb
      *
      * @return static
      */
-    protected function setBreadCrumb(string|array $breadcrumb): static
+    protected function setBreadCrumb(array|string $breadcrumb): static
     {
         $this->breadCrumbs = collect();
 
@@ -278,11 +278,11 @@ trait HasUI
     /**
      * Add BreadCrumb.
      *
-     * @param  string|array  $breadcrumb
+     * @param  array|string  $breadcrumb
      *
      * @return static
      */
-    protected function addBreadCrumb(string|array $breadcrumb): static
+    protected function addBreadCrumb(array|string $breadcrumb): static
     {
         foreach ((array) $breadcrumb as $val) {
             if (is_string($val)) {
@@ -314,14 +314,14 @@ trait HasUI
     /**
      * Set Default Value for Request Input.
      *
-     * @param string|array $name
-     * @param mixed $value
-     * @param bool $force
+     * @param  array|string  $name
+     * @param  mixed  $value
+     * @param  bool  $force
      *
      * @return void
      * @throws Throwable
      */
-    protected function setDefault(string|array $name, mixed $value = null, bool $force = false): void
+    protected function setDefault(array|string $name, mixed $value = null, bool $force = false): void
     {
         setDefaultRequest($name, $value, $force);
     }

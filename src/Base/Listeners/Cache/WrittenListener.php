@@ -50,7 +50,8 @@ class WrittenListener
                 }
 
                 Cached::query()->create($data->toArray());
-            } catch (\Throwable $tr) {
+            }
+            catch (\Throwable $tr) {
                 $context = [
                     'message' => $tr->getMessage(),
                 ];

@@ -29,7 +29,7 @@ class UiServiceProvider extends ServiceProvider
         $this->app->singleton('kfnExceptionMessage', function (): IKfnUiException {
             KfnUiException::set();
 
-            return new KfnUiException();
+            return new KfnUiException;
         });
     }
 
@@ -60,7 +60,7 @@ class UiServiceProvider extends ServiceProvider
         Blade::anonymousComponentPath($customComponentDir, 'kfn');
         Blade::anonymousComponentPath(__DIR__.'/views/components', 'kfn');
 
-        Blade::if('hasSections', function (string|array $sections): bool {
+        Blade::if('hasSections', function (array|string $sections): bool {
             if (is_string($sections)) {
                 $sections = array_map(fn ($it) => trim($it), explode(',', $sections));
             }

@@ -32,7 +32,7 @@ class KfnUiException implements IKfnUiException
 
     public function exist(): bool
     {
-        return 'redirect' === config('koffinate.ui.exception.handling_method')
+        return config('koffinate.ui.exception.handling_method') === 'redirect'
             && self::$responseCode instanceof IResponseCode;
     }
 
@@ -74,7 +74,7 @@ class KfnUiException implements IKfnUiException
 
     public static function all(): array
     {
-        return (new static())->toArray();
+        return (new static)->toArray();
     }
 
     public static function put(IResponseCode $responseCode, string|null $message = null): void
@@ -88,7 +88,7 @@ class KfnUiException implements IKfnUiException
         setcookie('kfn-exc', encrypt($excData), time() + 60, '/', '', $isSecure, true);
     }
 
-    public static function get(string $key, string|int|null $default = null): string|int
+    public static function get(string $key, int|string|null $default = null): int|string
     {
         $all = self::all();
 
@@ -111,7 +111,8 @@ class KfnUiException implements IKfnUiException
                         self::$code = $rc->statusCode();
                         self::$statusText = $rc->statusText();
                     }
-                } catch (\Throwable $throw) {
+                }
+                catch (\Throwable $throw) {
                     //
                 }
             }

@@ -2,6 +2,4 @@
 
 namespace Kfn\Database\Eloquent;
 
-interface HasModel
-{
-}
+interface HasModel {}

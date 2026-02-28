@@ -64,7 +64,8 @@ class CacheInvalidate extends Command implements Isolatable
 
             if (count($stores) === 1) {
                 $cached->where('store', $stores[0]);
-            } else {
+            }
+            else {
                 $cached->whereIn('store', $stores);
             }
         }
@@ -92,9 +93,11 @@ class CacheInvalidate extends Command implements Isolatable
 
                     if ($cacheService->missing($cache->key)) {
                         $ids[] = $cache->id;
-                    } elseif ($cacheService->forget($cache->key)) {
+                    }
+                    elseif ($cacheService->forget($cache->key)) {
                         $ids[] = $cache->id;
-                    } else {
+                    }
+                    else {
                         static::$totalFailed++;
 
                         if ($this->output->isVerbose()) {
@@ -112,7 +115,8 @@ class CacheInvalidate extends Command implements Isolatable
                         if (Cached::query()->whereIn('id', $ids)->delete()) {
                             self::$totalInvalidated += count($ids);
                         }
-                    } catch (\Throwable $tr) {
+                    }
+                    catch (\Throwable $tr) {
                         $context = [
                             'message' => $tr->getMessage(),
                         ];
@@ -131,7 +135,8 @@ class CacheInvalidate extends Command implements Isolatable
         $this->newLine();
         if (static::$totalInvalidated > 0) {
             $this->components->info('successfully invalidated '.static::$totalInvalidated.' cache(s).');
-        } else {
+        }
+        else {
             $this->components->info('nothing caches already invalidated.');
         }
         if (static::$totalFailed > 0) {

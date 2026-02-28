@@ -13,10 +13,11 @@ use Kfn\UI\ViewAssetManager;
 
 if (! function_exists('disguiseText')) {
     /**
-     * @param string|int|float $plain
+     * @param  float|int|string  $plain
+     *
      * @return string
      */
-    function disguiseText(string|int|float $plain): string
+    function disguiseText(float|int|string $plain): string
     {
         $disguiseText = $plain;
         if (! is_string($plain)) {
@@ -27,7 +28,8 @@ if (! function_exists('disguiseText')) {
             $disguise = config('koffinate.view.obscure.text', '*****');
             if (strlen($disguiseText) <= strlen($disguise)) {
                 $disguiseText = $disguise;
-            } else {
+            }
+            else {
                 $disguiseText = preg_replace(
                     /** @lang text */
                     '/^(\+?\w{3})(\N+)(\w{2})$/',
@@ -43,10 +45,11 @@ if (! function_exists('disguiseText')) {
 
 if (! function_exists('obscureText')) {
     /**
-     * @param string|int|float $plain
+     * @param  float|int|string  $plain
+     *
      * @return string
      */
-    function obscureText(string|int|float $plain): string
+    function obscureText(float|int|string $plain): string
     {
         return disguiseText($plain);
     }
@@ -56,14 +59,14 @@ if (! function_exists('setDefaultRequest')) {
     /**
      * Set Default Value for Request Input.
      *
-     * @param string|array $name
-     * @param null $value
-     * @param bool $force
+     * @param  array|string  $name
+     * @param  null  $value
+     * @param  bool  $force
      *
      * @return void
      * @throws Throwable
      */
-    function setDefaultRequest(string|array $name, mixed $value = null, bool $force = true): void
+    function setDefaultRequest(array|string $name, mixed $value = null, bool $force = true): void
     {
         // make sure the page is fresh, not redirected.
         if (isRedirected()) {
@@ -87,8 +90,9 @@ if (! function_exists('setDefaultRequest')) {
             $force ? $request->merge($data) : $request->mergeIfMissing($data);
             $request->flashExcept('_token');
 
-        } catch (Exception $e) {
-            //throw_if(hasDebugModeEnabled(), $e);
+        }
+        catch (Exception $e) {
+            // throw_if(hasDebugModeEnabled(), $e);
             $context = [
                 'code' => $e->getCode(),
                 'message' => $e->getMessage(),
@@ -180,7 +184,7 @@ if (! function_exists('vendor')) {
     /**
      * Generate an asset path for the application.
      *
-     * @param string $path
+     * @param  string  $path
      *
      * @return string
      */
@@ -194,7 +198,7 @@ if (! function_exists('document')) {
     /**
      * Generate an asset path for the application.
      *
-     * @param string $path
+     * @param  string  $path
      *
      * @return string
      */
@@ -209,12 +213,12 @@ if (! function_exists('plugins')) {
      * Retrieve Application Plugins.
      * retrieving from config's definitions.
      *
-     * @param  string|array|null  $name
+     * @param  array|string|null  $name
      * @param  string  $source
      *
      * @return \Kfn\UI\Contracts\ViewAssetManager
      */
-    function plugins(string|array|null $name = null, string $source = 'local'): \Kfn\UI\Contracts\ViewAssetManager
+    function plugins(array|string|null $name = null, string $source = 'local'): \Kfn\UI\Contracts\ViewAssetManager
     {
         $plugin = ViewAssetManager::init();
         if ($name) {
@@ -273,13 +277,13 @@ if (! function_exists('isDev')) {
 
 if (! function_exists('activeCss')) {
     /**
-     * @param  string|array  $route
-     * @param  string|array  $params
+     * @param  array|string  $route
+     * @param  array|string  $params
      * @param  string  $cssClass
      *
      * @return string
      */
-    function activeCss(string|array $route = '', string|array $params = [], string $cssClass = 'active current'): string
+    function activeCss(array|string $route = '', array|string $params = [], string $cssClass = 'active current'): string
     {
         return activeRoute($route, $params) ? $cssClass : '';
     }
@@ -289,11 +293,11 @@ if (! function_exists('getErrors')) {
     /**
      * Get validation errors.
      *
-     * @param string|null $bag
+     * @param  string|null  $bag
      *
      * @return ViewErrorBag|null
      */
-    function getErrors(?string $bag = null): ?ViewErrorBag
+    function getErrors(string|null $bag = null): ViewErrorBag|null
     {
         $errors = session('errors');
         if (! $errors instanceof ViewErrorBag) {
@@ -314,12 +318,12 @@ if (! function_exists('hasError')) {
     /**
      * Exist validation error.
      *
-     * @param string|array|null $key
-     * @param string|null $bag
+     * @param  array|string|null  $key
+     * @param  string|null  $bag
      *
      * @return bool
      */
-    function hasError(string|array|null $key = null, ?string $bag = null): bool
+    function hasError(array|string|null $key = null, string|null $bag = null): bool
     {
         if (($errors = getErrors($bag)) instanceof ViewErrorBag === false) {
             return false;
@@ -333,16 +337,16 @@ if (! function_exists('inputFeedbackComponent')) {
     /**
      * Input feedback component.
      *
-     * @param string|array $message
-     * @param string $mode valid|invalid
-     * @param string $type feedback|tooltip
-     * @param string $glue
-     * @param string|null $id
+     * @param  array|string  $message
+     * @param  string  $mode  valid|invalid
+     * @param  string  $type  feedback|tooltip
+     * @param  string  $glue
+     * @param  string|null  $id
      *
      * @return Htmlable
      */
     function inputFeedbackComponent(
-        string|array $message,
+        array|string $message,
         string $mode = 'invalid',
         string $type = 'feedback',
         string $glue = '<br>',
@@ -372,15 +376,15 @@ if (! function_exists('feedbackClass')) {
     /**
      * Feedback CSS Class.
      *
-     * @param string|array|null $key
-     * @param string|null $bag
-     * @param bool $isGroup
-     * @param string|null $class
+     * @param  array|string|null  $key
+     * @param  string|null  $bag
+     * @param  bool  $isGroup
+     * @param  string|null  $class
      *
      * @return string
      */
     function feedbackClass(
-        string|array|null $key = null,
+        array|string|null $key = null,
         string|null $bag = null,
         bool $isGroup = false,
         string|null $class = null,
@@ -397,14 +401,15 @@ if (! function_exists('feedbackInput')) {
     /**
      * InValid input feedback.
      *
-     * @param string|array|null $key
-     * @param ?string $bag
-     * @param string $type feedback|tooltip
-     * @param bool $asString
+     * @param  array|string|null  $key
+     * @param  ?string  $bag
+     * @param  string  $type  feedback|tooltip
+     * @param  bool  $asString
+     *
      * @return Htmlable|string
      */
     function feedbackInput(
-        string|array|null $key = null,
+        array|string|null $key = null,
         string|null $bag = null,
         string $type = 'feedback',
         bool $asString = false,
@@ -420,7 +425,8 @@ if (! function_exists('feedbackInput')) {
                     $messages[] = $errors->first($k);
                 }
             }
-        } else {
+        }
+        else {
             $messages = $errors->first($key);
         }
 
@@ -432,8 +438,9 @@ if (! function_exists('errorAll')) {
     /**
      * InValid input feedback.
      *
-     * @param string|null $bag
-     * @param array|null $exclude
+     * @param  string|null  $bag
+     * @param  array|null  $exclude
+     *
      * @return string
      */
     function errorAll(string|null $bag = null, array|null $exclude = null): string
@@ -458,7 +465,7 @@ if (! function_exists('viewPath')) {
     /**
      * Compile view path.
      *
-     * @param string|null $path
+     * @param  string|null  $path
      *
      * @return string
      */
@@ -470,7 +477,8 @@ if (! function_exists('viewPath')) {
             $view = view()->shared('viewPath', '');
 
             return $view.$path;
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             return $path;
         }
     }
@@ -482,10 +490,10 @@ if (! function_exists('paginated')) {
      *
      * @param  Arrayable  $source
      *
-     * @return Pagination\Paginator|Pagination\CursorPaginator
+     * @return Pagination\CursorPaginator|Pagination\Paginator
      * @throws Exception
      */
-    function paginated(Arrayable $source): Pagination\Paginator|Pagination\CursorPaginator
+    function paginated(Arrayable $source): Pagination\CursorPaginator|Pagination\Paginator
     {
         if (
             $source instanceof Pagination\Paginator ||
@@ -503,7 +511,7 @@ if (! function_exists('isPaginated')) {
     /**
      * Check data is paginated.
      *
-     * @param Arrayable $source
+     * @param  Arrayable  $source
      *
      * @return bool
      */
@@ -513,7 +521,8 @@ if (! function_exists('isPaginated')) {
             return
                 $source instanceof Pagination\Paginator ||
                 $source instanceof Pagination\CursorPaginator;
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             return false;
         }
     }
@@ -523,7 +532,7 @@ if (! function_exists('paginatedStyleReset')) {
     /**
      * Style reset paginate.
      *
-     * @param Arrayable $source
+     * @param  Arrayable  $source
      *
      * @return string
      */
@@ -534,7 +543,8 @@ if (! function_exists('paginatedStyleReset')) {
             $numReset = $source->perPage() * ($source->currentPage() - 1);
 
             return "counter-reset: _rownum {$numReset};";
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             return '';
         }
     }
@@ -544,9 +554,9 @@ if (! function_exists('paginatedLink')) {
     /**
      * Generate paginate links.
      *
-     * @param Arrayable $source
-     * @param string|null $view
-     * @param array $data
+     * @param  Arrayable  $source
+     * @param  string|null  $view
+     * @param  array  $data
      *
      * @return Htmlable
      */
@@ -559,7 +569,8 @@ if (! function_exists('paginatedLink')) {
             $source = paginated($source);
 
             return $source->links($view, $data);
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             return str()->toHtmlString();
         }
     }
@@ -605,11 +616,11 @@ if (! function_exists('methodIf')) {
 
 if (! function_exists('hasStack')) {
     /**
-     * @param  string|array|null  $name
+     * @param  array|string|null  $name
      *
      * @return bool
      */
-    function hasStack(string|array|null $name = null): bool
+    function hasStack(array|string|null $name = null): bool
     {
         if (! $name) {
             return false;

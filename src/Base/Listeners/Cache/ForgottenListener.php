@@ -25,7 +25,8 @@ class ForgottenListener
                 ->where('key', $event->key)
                 ->where('store', $event->storeName)
                 ->delete();
-        } catch (\Throwable $tr) {
+        }
+        catch (\Throwable $tr) {
             $context = [
                 'message' => $tr->getMessage(),
             ];

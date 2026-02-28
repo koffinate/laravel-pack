@@ -32,7 +32,7 @@ trait HasApi
     }
 
     /**
-     * @param  JsonResource|ResourceCollection|Arrayable|Paginator|CursorPaginator|array|string|null  $data
+     * @param  array|Arrayable|CursorPaginator|JsonResource|Paginator|ResourceCollection|string|null  $data
      * @param  string|null  $message
      * @param  ResponseCode  $rc
      * @param  array  $headers
@@ -41,7 +41,7 @@ trait HasApi
      * @return Response
      */
     public function response(
-        JsonResource|ResourceCollection|Arrayable|Pagination\Paginator|Pagination\CursorPaginator|array|string|null $data = null,
+        array|Arrayable|JsonResource|Pagination\CursorPaginator|Pagination\Paginator|ResourceCollection|string|null $data = null,
         string|null $message = null,
         ResponseCode $rc = ResponseCode::SUCCESS,
         array $headers = [],

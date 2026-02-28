@@ -29,7 +29,8 @@ class FlushedListener
             }
 
             $cached->delete();
-        } catch (\Throwable $tr) {
+        }
+        catch (\Throwable $tr) {
             $context = [
                 'message' => $tr->getMessage(),
             ];

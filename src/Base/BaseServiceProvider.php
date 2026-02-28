@@ -29,9 +29,9 @@ class BaseServiceProvider extends ServiceProvider
             Event::listen(CacheEvents\KeyForgotten::class, CacheListeners\ForgottenListener::class);
             Event::listen(CacheEvents\CacheFlushed::class, CacheListeners\FlushedListener::class);
             Event::listen('cache:*', function (string $eventName, array $data) {
-                if ('cache:cleared' === $eventName) {
+                if ($eventName === 'cache:cleared') {
                     [$storeName, $tags] = $data;
-                    $listen = new CacheListeners\FlushedListener();
+                    $listen = new CacheListeners\FlushedListener;
                     $listen->handle(new CacheEvents\CacheFlushed($storeName, $tags));
                 }
             });
@@ -44,13 +44,14 @@ class BaseServiceProvider extends ServiceProvider
                     ''
                 );
                 $dumpServerStarted = stream_socket_client('tcp://'.$dumpServerHost->toString());
-            } catch (\Throwable $th) {
+            }
+            catch (\Throwable $th) {
                 $dumpServerStarted = false;
             }
 
             if (! $dumpServerStarted) {
-                VarDumper::setHandler(function ($var, ?string $label = null) {
-                    if (null !== $label) {
+                VarDumper::setHandler(function ($var, string|null $label = null) {
+                    if ($label !== null) {
                         $var = array_merge(['label' => $label], $var);
                     }
 
@@ -60,7 +61,7 @@ class BaseServiceProvider extends ServiceProvider
         }
     }
 
-    /** @inheritDoc */
+    /** {@inheritDoc} */
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/config.php', 'koffinate.base');

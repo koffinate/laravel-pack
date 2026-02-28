@@ -37,14 +37,14 @@ trait InteractWithResponse
     }
 
     /**
-     * @param  string|\BackedEnum  $route
+     * @param  \BackedEnum|string  $route
      * @param  array  $parameters
      * @param  int  $status
      * @param  array  $headers
      *
      * @return Response
      */
-    public function route(string|\BackedEnum $route, array $parameters = [], int $status = 302, array $headers = []): Response
+    public function route(\BackedEnum|string $route, array $parameters = [], int $status = 302, array $headers = []): Response
     {
         $this->validateResponse();
 
@@ -52,14 +52,14 @@ trait InteractWithResponse
     }
 
     /**
-     * @param  string|array  $action
+     * @param  array|string  $action
      * @param  array  $parameters
      * @param  int  $status
      * @param  array  $headers
      *
      * @return Response
      */
-    public function action(string|array $action, array $parameters = [], int $status = 302, array $headers = []): Response
+    public function action(array|string $action, array $parameters = [], int $status = 302, array $headers = []): Response
     {
         $this->validateResponse();
 

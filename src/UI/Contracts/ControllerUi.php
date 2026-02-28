@@ -2,6 +2,4 @@
 
 namespace Kfn\UI\Contracts;
 
-interface ControllerUi
-{
-}
+interface ControllerUi {}
