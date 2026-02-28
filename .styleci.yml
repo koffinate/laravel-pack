@@ -3,7 +3,6 @@ version: 8.2
 preset: laravel
 
 disabled:
-  - braces
   - concat_without_spaces
   - laravel_braces
   - laravel_phpdoc_alignment
