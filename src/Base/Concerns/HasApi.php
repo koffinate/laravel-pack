@@ -8,6 +8,7 @@ use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Kfn\Base\Contracts\IResponseResult;
 use Kfn\Base\Enums\ResponseCode;
 use Kfn\Base\Response;
 
@@ -20,7 +21,7 @@ trait HasApi
     protected array $responseMessages;
 
     /**
-     * Use to get response message.
+     * Use to get a response message.
      *
      * @param  string  $context
      *
@@ -37,6 +38,7 @@ trait HasApi
      * @param  ResponseCode  $rc
      * @param  array  $headers
      * @param  array  $extra
+     * @param  IResponseResult|null  $as
      *
      * @return Response
      */
@@ -45,13 +47,14 @@ trait HasApi
         string|null $message = null,
         ResponseCode $rc = ResponseCode::SUCCESS,
         array $headers = [],
-        array $extra = []
+        array $extra = [],
+        IResponseResult|null $as = null
     ): Response {
         if (is_null($this->accept)) {
             $this->acceptJson();
         }
 
-        return new Response($data, $message, $rc, $headers, $extra);
+        return new Response($data, $message, $rc, $headers, $extra, $as);
     }
 
     public function contentType(string $contentType): static

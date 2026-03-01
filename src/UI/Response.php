@@ -17,14 +17,24 @@ use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Fluent;
 use Kfn\Base\Contracts\IResponseCode;
 use Kfn\Base\Enums\ResponseCode;
+use Kfn\Base\Enums\ResponseResult;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class Response extends \Kfn\Base\Response implements Responsable
 {
+    /** @var Response|string|View|null */
     private Response|string|View|null $view = null;
+
+    /** @var Fluent */
     private Fluent $viewOption;
+
+    /** @var string|null */
     private string|null $redirect = null;
+
+    /** @var Fluent */
     private Fluent $redirectOption;
+
+    /** @var array */
     private array $with = [];
 
     /** {@inheritdoc} */
@@ -35,7 +45,7 @@ class Response extends \Kfn\Base\Response implements Responsable
         array $headers = [],
         array $extra = []
     ) {
-        parent::__construct($data, $message, $code, $headers, $extra);
+        parent::__construct($data, $message, $code, $headers, $extra, ResponseResult::DEFAULT);
         $this->redirectOption = new Fluent;
         $this->viewOption = new Fluent;
     }
@@ -43,15 +53,17 @@ class Response extends \Kfn\Base\Response implements Responsable
     /** {@inheritdoc} */
     public function toResponse($request): HttpResponse|JsonResponse|SymfonyResponse
     {
-        if (! $request->expectsJson()) {
-            if (in_array($this->redirect, ['back', 'to', 'intended', 'action', 'route'])) {
-                $response = null;
-                $this->handleRedirect($request, $response);
+        $response = null;
 
-                if ($response instanceof RedirectResponse) {
-                    return $response->send();
-                }
+        if (in_array($this->redirect, ['back', 'to', 'intended', 'action', 'route'])) {
+            $this->handleRedirect($request, $response);
+        }
+
+        if (! $request->expectsJson()) {
+            if ($response instanceof RedirectResponse) {
+                return $response->send();
             }
+
             if (! is_null($this->view)) {
                 return new HttpResponse($this->handleView());
             }

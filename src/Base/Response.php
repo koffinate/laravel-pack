@@ -35,12 +35,25 @@ class Response implements IResponse, Responsable
 
     /** @var int */
     public static int $jsonOption = JSON_THROW_ON_ERROR;
+
+    /** @var ResponseHeaderBag */
     public ResponseHeaderBag $headers;
+
+    /** @var string */
     protected string $content;
     protected string $version;
+
+    /** @var int */
     protected int $statusCode;
+
+    /** @var string */
     protected string $statusText;
+
+    /** @var string|null */
     protected string|null $charset = null;
+
+    /** @var array */
+    public array $extra = [];
 
     /**
      * Response constructor.
@@ -50,16 +63,19 @@ class Response implements IResponse, Responsable
      * @param  IResponseCode  $code
      * @param  array  $headers
      * @param  array  $extra
+     * @param  IResponseResult|null  $as
      */
     public function __construct(
         public array|Arrayable|CursorPaginator|JsonResource|LengthAwarePaginator|ResourceCollection|string|null $data = null,
         public string|null $message = null,
         public IResponseCode $code = ResponseCode::SUCCESS,
         array $headers = [],
-        public array $extra = [],
+        array $extra = [],
+        private readonly IResponseResult|null $as = null
     ) {
         //
         $this->headers = new ResponseHeaderBag($headers);
+        $this->extra = array_merge($this->extra, $extra);
     }
 
     /**
@@ -102,7 +118,11 @@ class Response implements IResponse, Responsable
             default => $this->data,
         };
 
-        if (static::$resultAs == ResponseResult::CUSTOM) {
+        if ($this->as instanceof IResponseResult && static::$resultAs !== ResponseResult::CUSTOM) {
+            static::$resultAs = $this->as;
+        }
+
+        if (static::$resultAs === ResponseResult::CUSTOM) {
             if (static::$customResult instanceof Closure) {
                 return call_user_func(static::$customResult, $this, $payload);
             }
