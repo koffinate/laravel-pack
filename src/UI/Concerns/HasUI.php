@@ -12,6 +12,7 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Fluent;
+use Inertia\Inertia;
 use Kfn\Base\Contracts\IResponseCode;
 use Kfn\Base\Enums\ResponseCode;
 use Kfn\UI\Enums\RenderType;
@@ -110,7 +111,7 @@ trait HasUI
         }
 
         if (in_array(config('koffinate.ui.type'), [UIType::INERTIA, UIType::INERTIA->value]) && class_exists('Inertia\Inertia')) {
-            return $this->renderingView(\Inertia\Inertia::render($view, $this->controllerData), asResponse: $renderAsResponse);
+            return $this->renderingView(Inertia::render($view, $this->controllerData), asResponse: $renderAsResponse);
         }
 
         if (property_exists($this, 'kfnTable') && $this->kfnTable instanceof DataTableButtons) {
@@ -171,7 +172,7 @@ trait HasUI
      * @param  mixed  $value
      *
      * @return static
-     * @throws \Exception
+     * @throws Exception
      */
     protected function setData(string $name, mixed $value): static
     {

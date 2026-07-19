@@ -4,7 +4,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 return [
     /**
-     * Force json response.
+     * Force JSON response.
      */
     'force_json' => true,
     'force_json_prefixes' => ['api'],

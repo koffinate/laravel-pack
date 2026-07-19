@@ -2,7 +2,6 @@
 
 namespace Kfn\Base\Concerns;
 
-use Illuminate\Contracts\Pagination;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Contracts\Support\Arrayable;
@@ -43,7 +42,7 @@ trait HasApi
      * @return Response
      */
     public function response(
-        array|Arrayable|JsonResource|Pagination\CursorPaginator|Pagination\Paginator|ResourceCollection|string|null $data = null,
+        array|Arrayable|CursorPaginator|JsonResource|Paginator|ResourceCollection|string|null $data = null,
         string|null $message = null,
         ResponseCode $rc = ResponseCode::SUCCESS,
         array $headers = [],

@@ -2,11 +2,12 @@
 
 namespace Kfn\UI;
 
+use Illuminate\Foundation\Vite;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Fluent;
 use Illuminate\Support\HtmlString;
 
-class ViewAssetManager implements \Kfn\UI\Contracts\ViewAssetManager
+class ViewAssetManager implements Contracts\ViewAssetManager
 {
     /** @var bool */
     public static bool $built = false;
@@ -170,13 +171,13 @@ class ViewAssetManager implements \Kfn\UI\Contracts\ViewAssetManager
      */
     private function buildViteAsset(): void
     {
-        if (class_exists(\Illuminate\Foundation\Vite::class)) {
+        if (! class_exists(Vite::class)) {
             return;
         }
         $result = new Fluent;
 
         self::$assets->whenNotEmpty(function (Collection $assets) use (&$result) {
-            $vite = app(\Illuminate\Foundation\Vite::class);
+            $vite = app(Vite::class);
             $scriptType = self::$scriptType;
 
             $assets->each(function ($asset) use ($scriptType, $vite, &$result) {

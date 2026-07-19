@@ -21,6 +21,8 @@ use Kfn\Base\Contracts\IResponse;
 use Kfn\Base\Contracts\IResponseCode;
 use Kfn\Base\Enums\ResponseCode;
 use Kfn\UI\KfnUiException;
+use Spatie\Permission\Exceptions\RoleAlreadyExists;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
@@ -95,7 +97,7 @@ class KfnException extends \Exception implements Arrayable, IKfnException, Respo
 
                     $redirect->withInput()->send();
                 }
-                catch (\Throwable $e) {
+                catch (Throwable $e) {
                     // continue to the next handler
                 }
             }
@@ -206,7 +208,7 @@ class KfnException extends \Exception implements Arrayable, IKfnException, Respo
                 $throwable = static::mapToException($request, $throwable);
             }
 
-            \Kfn\Base\Exceptions\KfnException::renderException($request, $throwable, false);
+            KfnException::renderException($request, $throwable, false);
         }
         if ($unrenderable instanceof Closure) {
             return call_user_func($unrenderable, $throwable, $request);
@@ -262,7 +264,7 @@ class KfnException extends \Exception implements Arrayable, IKfnException, Respo
             return new static(ResponseCode::ERR_VALIDATION, $throwable->getMessage(), $throwable->errors(), previous: $throwable);
         }
 
-        if ($throwable instanceof \Spatie\Permission\Exceptions\RoleAlreadyExists) {
+        if ($throwable instanceof RoleAlreadyExists) {
             return new static(ResponseCode::ERR_VALIDATION, $throwable->getMessage(), previous: $throwable);
         }
 
@@ -274,7 +276,7 @@ class KfnException extends \Exception implements Arrayable, IKfnException, Respo
             return new static(ResponseCode::ERR_ROUTE_NOT_FOUND, $throwable->getMessage(), null, previous: $throwable);
         }
 
-        if ($throwable instanceof AuthorizationException || $throwable instanceof \Spatie\Permission\Exceptions\UnauthorizedException) {
+        if ($throwable instanceof AuthorizationException || $throwable instanceof UnauthorizedException) {
             return new static(ResponseCode::ERR_ACTION_UNAUTHORIZED, $throwable->getMessage(), null, previous: $throwable);
         }
 

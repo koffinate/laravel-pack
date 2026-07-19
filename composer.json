@@ -1,4 +1,5 @@
 {
+  "$schema": "https://getcomposer.org/schema.json",
   "name": "koffinate/laravel-pack",
   "type": "library",
   "description": "Laravel plugin pack by Koffinate",
@@ -13,13 +14,13 @@
     }
   ],
   "require": {
-    "php": "^8.2",
+    "php": "^8.3",
     "ext-json": "*",
-    "illuminate/auth": "^11.0|^12.0",
-    "illuminate/container": "^11.0|^12.0",
-    "illuminate/contracts": "^11.0|^12.0",
-    "illuminate/database": "^11.0|^12.0",
-    "illuminate/support": "^11.0|^12.0"
+    "illuminate/auth": "^12.0|^13.0",
+    "illuminate/container": "^12.0|^13.0",
+    "illuminate/contracts": "^12.0|^13.0",
+    "illuminate/database": "^12.0|^13.0",
+    "illuminate/support": "^12.0|^13.0"
   },
   "autoload": {
     "psr-4": {

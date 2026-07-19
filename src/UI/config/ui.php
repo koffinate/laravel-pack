@@ -20,16 +20,16 @@ return [
      * The obscure text to be used.
      */
     'obscure' => [
-        'enable' => (bool) env('KFN_VIEW_OBSCURE', false),
-        'text' => env('KFN_VIEW_OBSCURE_TEXT', '*****'),
+        'enable' => (bool) env('KFN_UI_OBSCURE', false),
+        'text' => env('KFN_UI_OBSCURE_TEXT', '*****'),
     ],
 
     /**
      * The url to be used.
      */
     'url' => [
-        'document' => env('KFN_DOCUMENT_URL', ''),
-        'vendor' => env('KFN_VENDOR_URL', ''),
+        'document' => env('KFN_UI_DOCUMENT_URL', ''),
+        'vendor' => env('KFN_UI_VENDOR_URL', ''),
     ],
 
     'html' => [
@@ -45,12 +45,12 @@ return [
      * The feedback template to be used.
      *
      * fill with null to default template.
-     * or your custom html tag
+     * or your custom HTML tag
      *
      * with available variables:
-     *  - :feedback-class:  => to render feedback class
-     *  - :id:  => to render tag id
-     *  - :message:  => to render feedback message
+     *   - :feedback-class: => to render feedback class
+     *   - :id: => to render tag id
+     *   - :message: => to render a feedback message
      *
      * e.g. <div class=":feedback-class:" id=":id:">:message:</div>
      */
@@ -65,26 +65,26 @@ return [
         /**
          * enabling exception handling.
          */
-        'enabled' => true,
+        'enabled' => env('KFN_UI_HANDLING', true),
 
         /**
          * handling method if exception occurs.
          * available values: redirect, abort
          * default method is "abort".
          */
-        'handling_method' => 'abort',
+        'handling_method' => env('KFN_UI_HANDLING_METHOD', 'abort'),
 
         /**
          * redirect to url.
          * available values: back, url-string.
          */
-        'redirect_to' => 'back',
+        'redirect_to' => env('KFN_UI_HANDLING_REDIRECT_TO', 'back'),
 
         /**
          * fallback url
          * will be used when exception occurs and fail on redirected back to the previous url.
          */
-        'fallback_url' => '/',
+        'fallback_url' => env('KFN_UI_HANDLING_FALLBACK_URL', '/'),
     ],
 
 ];

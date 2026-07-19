@@ -3,9 +3,13 @@
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Database;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Fluent;
 use Illuminate\Support\Str;
+use Kfn\Util\Value;
+use Sentry\Laravel\Integration;
 
 if (! function_exists('user')) {
     /**
@@ -378,7 +382,7 @@ if (! function_exists('toSentry')) {
     function toSentry(Throwable $throw): void
     {
         if (app()->bound('sentry') && ! app()->isLocal()) {
-            \Sentry\Laravel\Integration::captureUnhandledException($throw);
+            Integration::captureUnhandledException($throw);
         }
     }
 }
@@ -483,9 +487,9 @@ if (! function_exists('to_routed')) {
      * @param  int  $status
      * @param  array  $headers
      *
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
-    function to_routed(string $name, array|string $params = [], int $status = 302, array $headers = []): \Illuminate\Http\RedirectResponse
+    function to_routed(string $name, array|string $params = [], int $status = 302, array $headers = []): RedirectResponse
     {
         try {
             return redirect()->route($name, $params, $status, $headers);
@@ -530,8 +534,8 @@ if (! function_exists('activeRoute')) {
                     }
 
                     if (
-                        $requestRoute->parameter($key) instanceof \Illuminate\Database\Eloquent\Model
-                        && $value instanceof \Illuminate\Database\Eloquent\Model
+                        $requestRoute->parameter($key) instanceof Model
+                        && $value instanceof Model
                         && $requestRoute->parameter($key)->id != $value->id
                     ) {
                         return false;
@@ -577,5 +581,33 @@ if (! function_exists('getRawSql')) {
         Database\Eloquent\Builder|Database\Query\Builder $query,
     ): string {
         return Str::replaceArray('?', $query->getBindings(), $query->toSql());
+    }
+}
+
+if (! function_exists('isTrue')) {
+    /**
+     * Check if the value is true.
+     *
+     * @param  mixed  $value
+     *
+     * @return mixed
+     */
+    function isTrue(mixed $value): bool
+    {
+        return Value::isTrue($value);
+    }
+}
+
+if (! function_exists('isFalse')) {
+    /**
+     * Check if the value is false.
+     *
+     * @param  mixed  $value
+     *
+     * @return mixed
+     */
+    function isFalse(mixed $value): bool
+    {
+        return Value::isFalse($value);
     }
 }

@@ -1,8 +1,10 @@
 <?php
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Pagination;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\HtmlString;
@@ -216,9 +218,9 @@ if (! function_exists('plugins')) {
      * @param  array|string|null  $name
      * @param  string  $source
      *
-     * @return \Kfn\UI\Contracts\ViewAssetManager
+     * @return Kfn\UI\Contracts\ViewAssetManager
      */
-    function plugins(array|string|null $name = null, string $source = 'local'): \Kfn\UI\Contracts\ViewAssetManager
+    function plugins(array|string|null $name = null, string $source = 'local'): Kfn\UI\Contracts\ViewAssetManager
     {
         $plugin = ViewAssetManager::init();
         if ($name) {
@@ -581,7 +583,7 @@ if (! function_exists('includeIf')) {
      * @param  string|null  $path
      *
      * @return void
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     function includeIf(string|null $path = null): void
     {
@@ -593,7 +595,7 @@ if (! function_exists('includeIf')) {
         if ($view->exists($path)) {
             echo $view->make(
                 $path,
-                \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']),
+                Arr::except(get_defined_vars(), ['__data', '__path']),
             )->render();
         }
     }

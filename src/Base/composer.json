@@ -5,9 +5,9 @@
   "keywords": ["laravel", "framework", "koffinate", "yusron", "yusronarif"],
   "license": "MIT",
   "require": {
-    "php": "^8.2",
-    "illuminate/contracts": "^10.0|^11.0|^12.0",
-    "illuminate/support": "^10.0|^11.0|^12.0"
+    "php": "^8.3",
+    "illuminate/contracts": "^12.0|^13.0",
+    "illuminate/support": "^12.0|^13.0"
   },
   "autoload": {
     "psr-4": {
