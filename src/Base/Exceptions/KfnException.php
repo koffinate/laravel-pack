@@ -95,7 +95,9 @@ class KfnException extends \Exception implements Arrayable, IKfnException, Respo
                 try {
                     KfnUiException::put($this->rc, $this->getResponseMessage());
 
-                    $redirect->withInput()->send();
+                    // Kembalikan redirect agar dikirim kernel sekali saja.
+                    // send() di sini + abort() di bawah = double-send.
+                    return $redirect->withInput();
                 }
                 catch (Throwable $e) {
                     // continue to the next handler
@@ -232,9 +234,10 @@ class KfnException extends \Exception implements Arrayable, IKfnException, Respo
             $throwable = static::mapToException($request, $throwable);
         }
 
+        // Jangan send() di sini: pemanggil (renderable closure Laravel)
+        // yang menentukan respons final; kernel mengirim sekali saja.
         return $throwable->toResponse($request)
-            ->withHeaders(['Accept' => 'application/json'])
-            ->send();
+            ->withHeaders(['Accept' => 'application/json']);
     }
 
     /**

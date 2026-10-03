@@ -61,7 +61,10 @@ class Response extends \Kfn\Base\Response implements Responsable
 
         if (! $request->expectsJson()) {
             if ($response instanceof RedirectResponse) {
-                return $response->send();
+                // Jangan send() di sini: Laravel mengirim respons kembalian
+                // via kernel. send() + kirim kernel = double-send
+                // ("headers already sent").
+                return $response;
             }
 
             if (! is_null($this->view)) {
