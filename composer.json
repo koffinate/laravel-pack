@@ -16,6 +16,7 @@
   "require": {
     "php": "^8.3",
     "ext-json": "*",
+    "archtechx/enums": "^1.1",
     "illuminate/auth": "^12.0|^13.0",
     "illuminate/container": "^12.0|^13.0",
     "illuminate/contracts": "^12.0|^13.0",
@@ -32,8 +33,16 @@
       "src/Util/helpers.php"
     ]
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Kfn\\Tests\\": "tests/"
+    }
+  },
   "config": {
     "sort-packages": true
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit"
   },
   "extra": {
     "branch-alias": {
@@ -49,5 +58,9 @@
     }
   },
   "minimum-stability": "dev",
-  "prefer-stable": true
+  "prefer-stable": true,
+  "require-dev": {
+    "orchestra/testbench": "^11.3",
+    "phpunit/phpunit": "^13.3"
+  }
 }
